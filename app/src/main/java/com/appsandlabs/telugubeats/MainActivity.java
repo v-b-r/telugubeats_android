@@ -7,12 +7,14 @@ import android.content.ServiceConnection;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.appsandlabs.datalisteners.GenericListener;
@@ -26,12 +28,13 @@ public class MainActivity extends AppCompatActivity {
     private Paint blackPaint;
     private Paint greenPaint;
 
-    private float[] fftDataLeft = new float[1024*4];
-    private float[] fftDataRight = new float[1024*4];
+    private float[] fftDataLeft = new float[1024/2];
+    private float[] fftDataRight = new float[1024/2];
 
-    private float[] barHeightsLeft = new float[16];
-    private float[] barHeightsRight = new float[16];
-
+    private float[] barHeightsLeft = new float[VisualizerConfig.nBars];
+    private float[] barHeightsRight = new float[VisualizerConfig.nBars];
+    private View visualizerView;
+    public ServiceConnection serviceConnection;
 
 
     @Override
@@ -45,50 +48,88 @@ public class MainActivity extends AppCompatActivity {
 
         greenPaint  = new Paint();
         greenPaint.setColor(Color.GREEN);
-        greenPaint.setStyle(Paint.Style.FILL);
+        greenPaint.setStrokeWidth(3);
+        greenPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
 
-        ((LinearLayout)findViewById(R.id.content)).addView(new View(this){
+        ((LinearLayout)findViewById(R.id.content)).addView(visualizerView = new View(this) {
             @Override
             protected void onDraw(Canvas canvas) {
-                for(int i=0;i<32;i++){
-                    float max = 0 ;
-                    for(int j=0;j<fftDataLeft.length/32;j++){
-                        if(max > fftDataLeft[fftDataLeft.length/32*i+j]){
-                            max = fftDataLeft[fftDataLeft.length/32*i+j];
-                        }
+                float[] leftFft = fftDataLeft;
+                float[] rightFft = fftDataRight;
+                int nBars = VisualizerConfig.nBars;
+                for (int i = 0; i < nBars; i++) {
+                    float max = 0;
+                    int bandSize = leftFft.length / nBars;
+                    for (int j = 0; j < bandSize; j++) {
+                        //if (max < leftFft[bandSize * i + j]) {
+                        max += leftFft[bandSize * i + j];
+                        //}
                     }
-                    barHeightsLeft[i]  = max;
+                    barHeightsLeft[i] = max / bandSize;
                 }
 
-                for(int i=0;i<32;i++){
-                    float max = 0 ;
-                    for(int j=0;j<fftDataRight.length/32;j++){
-                        if(max > fftDataRight[fftDataRight.length/32*i+j]){
-                            max = fftDataRight[fftDataRight.length/32*i+j];
-                        }
+                for (int i = 0; i < nBars; i++) {
+                    float max = 0;
+                    int bandSize = rightFft.length / nBars;
+                    for (int j = 0; j < bandSize; j++) {
+                        // if (max < rightFft[bandSize * i + j]) {
+                        max += rightFft[bandSize * i + j];
+                        // }
                     }
-                    barHeightsRight[i]  = max;
+                    barHeightsRight[i] = max / bandSize;
                 }
 
-                for(int i=0;i<16;i++){//horizontal lines
-                    int y = i*VisualizerConfig.barHeight/16;
-                    canvas.drawLine(0 , y,  (VisualizerConfig.barWidth+VisualizerConfig.barSpacing)*VisualizerConfig.nBars , y , blackPaint);
-                }
 
-                for(int i=0;i<VisualizerConfig.nBars;i++){//horizontal lines
-                    int x = i*(VisualizerConfig.barWidth+VisualizerConfig.barSpacing);
+//                for (int i = 0; i < VisualizerConfig.nBars; i++) {//horizontal lines
+//                    int x = i * (VisualizerConfig.barWidth + VisualizerConfig.barSpacing);
+//                    canvas.drawRect(
+//                            x,
+//                            VisualizerConfig.barHeight - (barHeightsLeft[i]) / 16,
+//                            x + VisualizerConfig.barWidth,
+//                            VisualizerConfig.barHeight,
+//                            greenPaint);
+//                }
+                int xOffset = 0;//  (VisualizerConfig.barWidth + VisualizerConfig.barSpacing)*VisualizerConfig.nBars
+                for (int i = 0; i < VisualizerConfig.nBars / 2; i ++) {//horizontal lines
+                    int x = i * (VisualizerConfig.barWidth + VisualizerConfig.barSpacing) + xOffset;
+                    int max = VisualizerConfig.nBars/2;
+
+                    //draw max/2-i , max/2+i
+
                     canvas.drawRect(
-                            x ,
-                            barHeightsLeft[i],
-                            0 ,
-                            (VisualizerConfig.barWidth+VisualizerConfig.barSpacing)* i +  VisualizerConfig.barWidth ,
+                            x,
+                            VisualizerConfig.barHeight - (barHeightsRight[max - i]) / 8,//2*VisualizerConfig.nBars-1-i
+                            x + VisualizerConfig.barWidth,
+                            VisualizerConfig.barHeight,
+                            greenPaint);
+
+                }
+
+                for (int i = 0; i < VisualizerConfig.nBars/2; i++) {//horizontal lines
+                    int x =  (i+VisualizerConfig.nBars/2)* (VisualizerConfig.barWidth + VisualizerConfig.barSpacing) + xOffset;
+                    int max = VisualizerConfig.nBars;
+
+                    canvas.drawRect(
+                            x,
+                            VisualizerConfig.barHeight - (barHeightsRight[max-1-i]) / 8,//2*VisualizerConfig.nBars-1-i
+                            x + VisualizerConfig.barWidth,
+                            VisualizerConfig.barHeight,
                             greenPaint);
                 }
 
-                super.onDraw(canvas);
+                for (
+                        int i = 0;
+                        i < VisualizerConfig.hLines; i++)
+
+                {//horizontal lines
+                    int y = i * VisualizerConfig.barHeight / VisualizerConfig.hLines;
+                    canvas.drawLine(0, y, (VisualizerConfig.barWidth + VisualizerConfig.barSpacing) * VisualizerConfig.nBars * 2, y, blackPaint);
+                }
+
             }
-        });
+        }, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        visualizerView.setBackground(new ColorDrawable(Color.BLACK));
     }
 
 
@@ -97,8 +138,13 @@ public class MainActivity extends AppCompatActivity {
         TeluguBeatsConfig.onFFTData = new GenericListener<float[]>(){
             @Override
             public String onData(float[] l , float[] r) {
-                fftDataLeft = l;
-                fftDataRight = r;
+                fftDataLeft = new float[l.length];
+                System.arraycopy(l, 0, fftDataLeft, 0, fftDataLeft.length);;
+                fftDataRight = new float[l.length];
+                System.arraycopy(r, 0, fftDataRight, 0, fftDataRight.length);;
+
+                if(visualizerView!=null)
+                    visualizerView.postInvalidate();
                 return null;
             }
         };
@@ -107,7 +153,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        TeluguBeatsConfig.onFFTData = null;
+        TeluguBeatsConfig.onFFTData = new GenericListener<>();
+        if(mBound) {
+            unbindService(serviceConnection);
+            mBound = false;
+        }
         super.onPause();
     }
 
@@ -122,10 +172,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if(mBound) return;
-
-        //connect to background service
         Intent svc=new Intent(this, MusicService.class);
-        bindService(svc, new ServiceConnection() {
+        startService(svc);
+        //connect to background service
+        bindService(svc, serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 MusicService.MusicServiceBinder binder = (MusicService.MusicServiceBinder) service;
@@ -139,6 +189,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }, Context.BIND_AUTO_CREATE);
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

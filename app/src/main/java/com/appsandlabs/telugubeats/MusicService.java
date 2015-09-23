@@ -35,6 +35,9 @@ public class MusicService extends Service {
     private MusicServiceBinder serviceBinder;
     private MusicPlayThread playingThread;
 
+    public static final int FFT_N_SAMPLES = 1024;
+    private FFT leftFft = new FFT(FFT_N_SAMPLES , 44100);
+    private FFT rightFft = new FFT(FFT_N_SAMPLES , 44100);
 
     //this is a dummy binder , will just use methods from the original service class only
     public static class MusicServiceBinder extends Binder {
@@ -121,8 +124,8 @@ public class MusicService extends Service {
 
     public byte[] decode(InputStream stream)
             throws IOException, DecoderException {
-        TByteArrayOutputStream audioLeft = new TByteArrayOutputStream(4*1024);
-        TByteArrayOutputStream audioRight = new TByteArrayOutputStream(4*1024);
+        TByteArrayOutputStream audioLeft = new TByteArrayOutputStream(FFT_N_SAMPLES);
+        TByteArrayOutputStream audioRight = new TByteArrayOutputStream(FFT_N_SAMPLES);
 
         float totalMs = 0;
         boolean seeking = true;
@@ -132,8 +135,11 @@ public class MusicService extends Service {
         AudioTrack track=new AudioTrack(AudioManager.STREAM_MUSIC,44100,AudioFormat.CHANNEL_OUT_STEREO,AudioFormat.ENCODING_PCM_16BIT, bufferSize,AudioTrack.MODE_STREAM);
 
         track.play();
-        FFT fft = new FFT(4*1024, 44100);
-        InputStream inputStream = new BufferedInputStream(stream, 8 * 1024);
+        InputStream inputStream = new BufferedInputStream(stream, 2*FFT_N_SAMPLES);
+
+        fftArrayLeft = new float[leftFft.specSize()];
+        fftArrayRight = new float[rightFft.specSize()];
+
         try {
             Bitstream bitstream = new Bitstream(inputStream);
             Decoder decoder = new Decoder();
@@ -154,22 +160,22 @@ public class MusicService extends Service {
                         }
 
                         short[] pcm = output.getBuffer();
-                        if(frames>4){
+                        if(frames>1){
                             frames = 0;
                             audioLeft.reset();
                             audioRight.reset();
                             if(TeluguBeatsConfig.onFFTData!=null) {
-                                fft.forward(audioLeft.getBuffer());
-                                for (int i = 0; i < fft.specSize(); i++) {
-                                    fftArrayLeft[i] = fft.getBand(i) * 4;
+                                leftFft.forward(audioLeft.getBuffer());
+                                for (int i = 0; i < leftFft.specSize(); i++) {
+                                    fftArrayLeft[i] = leftFft.getBand(i);
                                 }
 
-                                fft.forward(audioRight.getBuffer());
-                                for (int i = 0; i < fft.specSize(); i++) {
-                                    fftArrayRight[i] = fft.getBand(i) * 4;
+                                rightFft.forward(audioRight.getBuffer());
+                                for (int i = 0; i < rightFft.specSize(); i++) {
+                                    fftArrayRight[i] = rightFft.getBand(i);
                                 }
+                                TeluguBeatsConfig.onFFTData.onData( fftArrayLeft, fftArrayRight);
                             }
-                            TeluguBeatsConfig.onFFTData.onData(fftArrayLeft, fftArrayRight);
                         }
                         for (short s : pcm) {
                             audioLeft.write(s & 0xff);
