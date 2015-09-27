@@ -10,6 +10,7 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.os.IBinder;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,10 +19,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.appsandlabs.TeluguBeatsApp;
 import com.appsandlabs.datalisteners.GenericListener;
 import com.appsandlabs.datalisteners.TeluguBeatsConfig;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity {
 
 
     MusicService musicService;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TeluguBeatsApp.onActivityCreated(this);
         setContentView(R.layout.activity_main);
 
         hLinesPaint = new Paint();
@@ -198,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         // unpause it from notification or something else
 //        musicService.pause = true;
+        TeluguBeatsApp.onActivityDestroyed(this);
         super.onDestroy();
     }
 
