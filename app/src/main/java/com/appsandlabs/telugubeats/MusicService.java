@@ -18,6 +18,8 @@ import org.apache.commons.io.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import javazoom.jl.decoder.Bitstream;
 import javazoom.jl.decoder.BitstreamException;
@@ -35,9 +37,10 @@ public class MusicService extends Service {
     private MusicServiceBinder serviceBinder;
     private MusicPlayThread playingThread;
 
-    public static final int FFT_N_SAMPLES = 1024;
+    public static final int FFT_N_SAMPLES = 2*1024;
     private FFT leftFft = new FFT(FFT_N_SAMPLES , 44100);
     private FFT rightFft = new FFT(FFT_N_SAMPLES , 44100);
+
 
     //this is a dummy binder , will just use methods from the original service class only
     public static class MusicServiceBinder extends Binder {
@@ -54,7 +57,6 @@ public class MusicService extends Service {
     }
 
 
-
     public IBinder onBind(Intent arg0) {
         Log.d("telugubeats_log", "bind");
         return serviceBinder==null? (serviceBinder = new MusicServiceBinder(this)) : serviceBinder;
@@ -64,7 +66,7 @@ public class MusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("telugubeats_log", "onstartcommand");
+        Log.d("telugubeats_log", "create");
 
         playingThread  = new MusicPlayThread(this);
         //downloads stream and starts playing mp3 music and keep updating polls
@@ -72,6 +74,8 @@ public class MusicService extends Service {
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        Log.d("telugubeats_log", "onstartCommad");
         return START_STICKY;
     }
 
@@ -86,7 +90,7 @@ public class MusicService extends Service {
 
     @Override
     public void onLowMemory() {
-
+        super.onLowMemory();
     }
 
     //music running thread , it just runs with a pause and stop methods
@@ -101,9 +105,12 @@ public class MusicService extends Service {
         @Override
         public void run() {
                 try {
-                    musicService.decode(musicService.getResources().openRawResource(
-                            R.raw.test_mp3));
+                    if(musicService.pause) return;
+                     URL url = new URL("http://192.168.0.102:8888/stream/telugu");
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    musicService.decode(con.getInputStream());
                 } catch (IOException | DecoderException e) {
+                    Log.d("telugubeats_log", "some error in thread");
                     e.printStackTrace();
                 }
         }
@@ -160,7 +167,7 @@ public class MusicService extends Service {
                         }
 
                         short[] pcm = output.getBuffer();
-                        if(frames>1){
+                        if(frames>2){
                             frames = 0;
                             audioLeft.reset();
                             audioRight.reset();

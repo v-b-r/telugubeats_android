@@ -1,18 +1,23 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/default_bg"
+    >
 
     <LinearLayout
-        android:id="@+id/content"
+        android:id="@+id/bg"
         android:orientation="vertical"
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-
-
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/fg"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        ></LinearLayout>
 
-
-</RelativeLayout>
+</FrameLayout>

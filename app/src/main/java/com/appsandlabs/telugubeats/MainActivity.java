@@ -6,8 +6,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.Shader;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,8 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
     MusicService musicService;
     private boolean mBound;
-    private Paint blackPaint;
-    private Paint greenPaint;
+    private Paint hLinesPaint;
+    private Paint barPaint;
 
     private float[] fftDataLeft = new float[1024/2];
     private float[] fftDataRight = new float[1024/2];
@@ -42,17 +43,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        blackPaint = new Paint();
-        blackPaint.setColor(Color.BLACK);
-        blackPaint.setStrokeWidth(3);
+        hLinesPaint = new Paint();
+        hLinesPaint.setColor(getResources().getColor(R.color.default_bg));
+        hLinesPaint.setStrokeWidth(3);
 
-        greenPaint  = new Paint();
-        greenPaint.setColor(Color.GREEN);
-        greenPaint.setStrokeWidth(3);
-        greenPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        barPaint = new Paint();
+        barPaint.setStrokeWidth(1);
+        barPaint.setShader(new LinearGradient(0, 0, 0, VisualizerConfig.barHeight, Color.BLUE, Color.argb(255, 200 , 200, 200), Shader.TileMode.MIRROR));
+        barPaint.setStyle(Paint.Style.FILL);
 
 
-        ((LinearLayout)findViewById(R.id.content)).addView(visualizerView = new View(this) {
+        ((LinearLayout)findViewById(R.id.bg)).addView(visualizerView = new View(this) {
             @Override
             protected void onDraw(Canvas canvas) {
                 float[] leftFft = fftDataLeft;
@@ -88,12 +89,12 @@ public class MainActivity extends AppCompatActivity {
 //                            VisualizerConfig.barHeight - (barHeightsLeft[i]) / 16,
 //                            x + VisualizerConfig.barWidth,
 //                            VisualizerConfig.barHeight,
-//                            greenPaint);
+//                            barPaint);
 //                }
                 int xOffset = 0;//  (VisualizerConfig.barWidth + VisualizerConfig.barSpacing)*VisualizerConfig.nBars
-                for (int i = 0; i < VisualizerConfig.nBars / 2; i ++) {//horizontal lines
+                for (int i = 0; i < VisualizerConfig.nBars / 2; i++) {//horizontal lines
                     int x = i * (VisualizerConfig.barWidth + VisualizerConfig.barSpacing) + xOffset;
-                    int max = VisualizerConfig.nBars/2;
+                    int max = VisualizerConfig.nBars / 2;
 
                     //draw max/2-i , max/2+i
 
@@ -102,20 +103,20 @@ public class MainActivity extends AppCompatActivity {
                             VisualizerConfig.barHeight - (barHeightsRight[max - i]) / 8,//2*VisualizerConfig.nBars-1-i
                             x + VisualizerConfig.barWidth,
                             VisualizerConfig.barHeight,
-                            greenPaint);
+                            barPaint);
 
                 }
 
-                for (int i = 0; i < VisualizerConfig.nBars/2; i++) {//horizontal lines
-                    int x =  (i+VisualizerConfig.nBars/2)* (VisualizerConfig.barWidth + VisualizerConfig.barSpacing) + xOffset;
+                for (int i = 0; i < VisualizerConfig.nBars / 2; i++) {//horizontal lines
+                    int x = (i + VisualizerConfig.nBars / 2) * (VisualizerConfig.barWidth + VisualizerConfig.barSpacing) + xOffset;
                     int max = VisualizerConfig.nBars;
 
                     canvas.drawRect(
                             x,
-                            VisualizerConfig.barHeight - (barHeightsRight[max-1-i]) / 8,//2*VisualizerConfig.nBars-1-i
+                            VisualizerConfig.barHeight - (barHeightsRight[max - 1 - i]) / 8,//2*VisualizerConfig.nBars-1-i
                             x + VisualizerConfig.barWidth,
                             VisualizerConfig.barHeight,
-                            greenPaint);
+                            barPaint);
                 }
 
                 for (
@@ -124,12 +125,22 @@ public class MainActivity extends AppCompatActivity {
 
                 {//horizontal lines
                     int y = i * VisualizerConfig.barHeight / VisualizerConfig.hLines;
-                    canvas.drawLine(0, y, (VisualizerConfig.barWidth + VisualizerConfig.barSpacing) * VisualizerConfig.nBars * 2, y, blackPaint);
+                    canvas.drawLine(0, y, (VisualizerConfig.barWidth + VisualizerConfig.barSpacing) * VisualizerConfig.nBars * 2, y, hLinesPaint);
                 }
 
             }
-        }, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        visualizerView.setBackground(new ColorDrawable(Color.BLACK));
+
+            @Override
+            protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+                VisualizerConfig.barWidth = (right - left) / VisualizerConfig.nBars - VisualizerConfig.barSpacing;
+
+                super.onLayout(changed, left, top, right, bottom);
+            }
+        }, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
+
+        // load current polls and poll data
+        // get current playing song
+        // get current
     }
 
 
@@ -148,7 +159,29 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         };
+
+
         super.onResume();
+        if(mBound) return;
+        Intent svc=new Intent(this, MusicService.class);
+        startService(svc);
+        //connect to background service
+        bindService(svc, serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                MusicService.MusicServiceBinder binder = (MusicService.MusicServiceBinder) service;
+                musicService = binder.getService();
+                //start downloading and playing stream
+                mBound = true;
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                mBound = false;
+            }
+        }, Context.BIND_AUTO_CREATE);
+
+
     }
 
     @Override
@@ -161,36 +194,12 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    protected void drawFfftData(){
-        // draw with pure canvas or surface view
-    }
-
-
-
-
     @Override
-    protected void onStart() {
-        super.onStart();
-        if(mBound) return;
-        Intent svc=new Intent(this, MusicService.class);
-        startService(svc);
-        //connect to background service
-        bindService(svc, serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                MusicService.MusicServiceBinder binder = (MusicService.MusicServiceBinder) service;
-                musicService = binder.getService();
-                mBound = true;
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mBound = false;
-            }
-        }, Context.BIND_AUTO_CREATE);
+    protected void onDestroy() {
+        // unpause it from notification or something else
+//        musicService.pause = true;
+        super.onDestroy();
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
