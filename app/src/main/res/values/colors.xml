@@ -3,4 +3,5 @@
     <color name="translucent_black">#AA000000</color>
     <color name="translucent_white">#AAFFFFFF</color>
     <color name="default_bg">#fff3f3f3</color>
+    <color name="red">#ffff0000</color>
 </resources>

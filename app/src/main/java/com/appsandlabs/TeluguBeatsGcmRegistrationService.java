@@ -38,11 +38,11 @@ public class TeluguBeatsGcmRegistrationService extends IntentService {
 
                 if(!UserDeviceManager.getPreference(getApplicationContext(), Config.GCM_SAVED, "").equalsIgnoreCase(token)) {
                     ServerCalls.setUserGCMKey(getApplicationContext(), token, new GenericListener<Boolean>() {
-                        public String onData(Boolean b) {
+                        public void onData(Boolean b) {
                             if (b) {
                                 UserDeviceManager.setPreference(getApplicationContext(), Config.GCM_SAVED, token);
                             }
-                            return null;
+                            return;
                         }
                     });
                 }

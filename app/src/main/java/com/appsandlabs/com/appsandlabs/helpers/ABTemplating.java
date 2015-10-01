@@ -31,21 +31,26 @@ import java.util.Map.Entry;
  */
 public class ABTemplating {
 
-	public enum IDs {
-		PLAYER_AND_STATS,
-		NONE ,
-		ACTORS,
-		DIRECTORS ,
-		SINGERS,
-		PLAYING_IMAGE;
 
-		public String getString() {
-			return this.name().toLowerCase() + "_container";
-		}
-	}
+	static int MATCH_PARENT = LayoutParams.MATCH_PARENT;
+	int WRAP_CONTENT = LayoutParams.WRAP_CONTENT;
+//
+//	public enum Ids {
+//		PLAYER_AND_STATS,
+//		NONE ,
+//		ACTORS,
+//		DIRECTORS ,
+//		SINGERS,
+//		PLAYING_IMAGE, LIVE_USERS, WHATS_APP_DEDICATE, SCROLLING_DEDICATIONS, NEXT_POLLS_HEADING;
+//
+//		public String getString() {
+//			return this.name().toLowerCase() + "_container";
+//		}
+//	}
 
 
 	public final static int NONE = -5;
+
 
 	public enum ViewType {
 		SCROLL_VIEW,
@@ -60,9 +65,10 @@ public class ABTemplating {
 		private Object tag2;
 		private TextView label;
 		private ImageView iconView;
+		private ImageView imageView;
 
-		public ABView(Context context, String id) {
-			super(context, null);
+		public ABView(String id) {
+			super(TeluguBeatsApp.getContext(), null);
 			if (Config.IS_TEST_BUILD)
 				UiUtils.setBg(this, getContext().getResources().getDrawable(R.drawable.custom_border));
 			name = id;
@@ -110,18 +116,6 @@ public class ABTemplating {
 		}
 
 
-		public ABView(IDs id) {
-			this(TeluguBeatsApp.getContext(), id.getString());
-			if (Config.IS_TEST_BUILD)
-				UiUtils.setBg(this, getContext().getResources().getDrawable(R.drawable.custom_border));
-		}
-
-		public ABView(int style, IDs id) {
-			this(style, id.getString());
-			if (Config.IS_TEST_BUILD)
-				UiUtils.setBg(this, getContext().getResources().getDrawable(R.drawable.custom_border));
-		}
-
 
 		public void registerInnerView(ABView view) {
 			cells.putAll(view.getAllCells());
@@ -140,10 +134,6 @@ public class ABTemplating {
 
 		public ABView getCell(String cellName) {
 			return cells.get(cellName);
-		}
-
-		public ABView getCell(IDs cellId) {
-			return cells.get(cellId.getString());
 		}
 
 		public ABView setCell(String cellName, ABView view) {
@@ -172,6 +162,15 @@ public class ABTemplating {
 			return this;
 		}
 
+		public ABView sz(int width, int height) {
+			return wd(width).ht(height);
+		}
+
+		public ABView occupy() {
+			return wd(MATCH_PARENT).ht(MATCH_PARENT);
+		}
+
+
 		public ABView ht(int height) {
 			if(height>0)
 				height = (int)getInDp(height);
@@ -191,14 +190,43 @@ public class ABTemplating {
 			return this;
 		}
 
+		public ABView wgtSum(int i) {
+			setWeightSum(i);
+			return this;
+		}
+
+
 		public ABView addLabel(String string) {
 			return addLabel(string, -1, true, false) ;
 		}
+		public ABView addLabel(String string, boolean isHeading) {
+			return addLabel(string, -1, true, true) ;
+		}
+
+		public ABView setLabelColor(int color){
+			if(label !=null){
+				label.setTextColor(color);
+			}
+			return this;
+		}
+
+		public ABView asSubTitle(){
+			if(label != null) {
+				label.setTextColor(Color.LTGRAY);
+				label.setTextSize(10);
+			}
+			return this;
+		}
+
+
+
 		public ABView addLabel(String string, float textSizeSp, boolean wrapLayout, boolean bold) {
-			label = new TextView(getContext(), null);
+			if(label==null) {
+				label = new TextView(getContext(), null);
+				this.addView(label);
+			}
 			label.setText(string);
-			label.setTextColor(Color.WHITE);
-        label.setSingleLine();
+	        label.setSingleLine();
 			if(textSizeSp!=-1)
 				label.setTextSize(textSizeSp* getInDp(1));
 			this.setPadding(15, 0, 0, 15);
@@ -207,10 +235,11 @@ public class ABTemplating {
 			else{
 				this.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			}
-        if(bold)
-            label.setTypeface(null, Typeface.BOLD);
+			if(bold) {
+				label.setTypeface(null, Typeface.BOLD);
+				label.setTextColor(Color.BLACK);
+			}
 			this.setGravity(Gravity.CENTER_VERTICAL);
-			this.addView(label);
 			return this;
 		}
 
@@ -226,7 +255,7 @@ public class ABTemplating {
 
 
 		public ABView asVScrollView(ABView... views) {
-			ABView scrollChild = new ABView(getContext(), name);
+			ABView scrollChild = new ABView( name);
 			scrollChild.setOrientation(LinearLayout.VERTICAL);
 			scrollChild.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			ScrollView scrollView = new ScrollView(getContext());
@@ -244,7 +273,7 @@ public class ABTemplating {
 		}
 
 		public ABView asHScrollView(ABView... views) {
-			ABView scrollChild = new ABView(getContext(), name);
+			ABView scrollChild = new ABView(name);
 			scrollChild.setOrientation(LinearLayout.HORIZONTAL);
 			scrollChild.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 			HorizontalScrollView scrollView = new HorizontalScrollView(getContext());
@@ -272,6 +301,8 @@ public class ABTemplating {
 					((ABView) ((HorizontalScrollView) this.getChildAt(0)).getChildAt(0)).addView(child);
 					break;
 				default:
+					if(child.getLayoutParams()==null)
+						child.setLayoutParams(new LayoutParams(MATCH_PARENT, MATCH_PARENT));
 					super.addView(child);
 			}
 		}
@@ -386,6 +417,17 @@ public class ABTemplating {
 			return this;
 		}
 
+		public ABView asImage() {
+			if(imageView == null)
+				imageView = new ImageView(getContext());
+			this.addView(imageView);
+			return this;
+		}
+
+		public ImageView getImage(){
+			return imageView;
+		}
+
 		public ABView setBg(UiUtils.Images img) {
 			UiUtils.setBg(this, img.getDrawable(this.getContext()));
 			return this;
@@ -421,6 +463,7 @@ public class ABTemplating {
 		public int getThemeColor() {
 			return Color.GRAY;
 		}
+
 	}
 
 	Context ctx = null;
@@ -449,18 +492,18 @@ public class ABTemplating {
     /*
     horizontal viewers
      */
-    public ABView h(IDs id, ABView... views) {
+    public ABView h(String id, ABView... views) {
         ABView ret = new ABView(id );
         return _h(ret, views);
     }
 
-    public ABView h(IDs id, int style, ABView... views) {
+    public ABView h(String id, int style, ABView... views) {
         ABView ret = new ABView(style , id);
         return _h(ret, views);
     }
 
 
-    public ABView h(boolean isScroll, IDs id , ABView... views) {
+    public ABView h(boolean isScroll, String id , ABView... views) {
         ABView ret = null;
         if (isScroll)
             ret = new ABView(id).asHScrollView();
@@ -471,12 +514,12 @@ public class ABTemplating {
     }
 
     public ABView h( ABView... views) {
-        ABView ret = new ABView(IDs.NONE );
+        ABView ret = new ABView("none" );
         return _h(ret, views);
     }
 
     public ABView h(int style, ABView... views) {
-        ABView ret = new ABView(style ,IDs.NONE);
+        ABView ret = new ABView(style , "none");
         return _h(ret, views);
     }
 
@@ -484,9 +527,9 @@ public class ABTemplating {
     public ABView h(boolean isScroll, ABView... views) {
         ABView ret = null;
         if (isScroll)
-            ret = new ABView(IDs.NONE).asHScrollView();
+            ret = new ABView("none").asHScrollView();
         else
-            ret = new ABView(IDs.NONE);
+            ret = new ABView("none");
 
         return _h(ret, views);
     }
@@ -506,16 +549,16 @@ public class ABTemplating {
     // horizontal views end
 
     public ABView v(boolean isScroll, ABView... views) {
-        return v(isScroll, IDs.NONE, views);
+        return v(isScroll, "none", views);
     }
     public ABView v(ABView... views){
-        return v(IDs.NONE, views);
+        return v("none", views);
     }
     public ABView v(int style, ABView... views) {
-        return v(style, IDs.NONE, views);
+        return v(style, "none", views);
     }
 
-    public ABView v(boolean isScroll, IDs id, ABView... views) {
+    public ABView v(boolean isScroll, String id, ABView... views) {
         ABView ret = null;
         if (isScroll)
             ret = new ABView(id).asVScrollView();
@@ -526,12 +569,12 @@ public class ABTemplating {
     }
 
 
-    public ABView v(IDs id, ABView... views) {
+    public ABView v(String id, ABView... views) {
         ABView ret = new ABView(id);
         return _v(ret, views);
     }
 
-    public ABView v(int style, IDs id, ABView... views) {
+    public ABView v(int style, String id, ABView... views) {
         ABView ret = new ABView(style, id);
         return _v(ret, views);
     }
@@ -584,19 +627,34 @@ public class ABTemplating {
 		return false;
 	}
 
-
-	public ABView getPlayerAndPollsView(Context context){
-		return h(
-				v(new ABView(IDs.PLAYING_IMAGE) , v(new ABView(IDs.SINGERS) , new ABView(IDs.ACTORS) , new ABView(IDs.DIRECTORS)))
-				
-		);
-
-
-
+	public ABView c(String id){
+		return new ABView(id);
+	}
+	public ABView c(){
+		return new ABView("none");
 	}
 
+	public ABView getPlayerAndPollsView(){
+		return v(
+					h(c("playingImage"), v(
+									h(c().addLabel("Singers"), c("singers")),
+									h(c().addLabel("Actors"), c("actors")),
+									h(c().addLabel("Director"), c("directors"))
+							)
+					),
+					h(c("live_users").addLabel("1000 live users").wgt(0.5f), c("whats_app_dedicate").wgt(0.5f)),
+					c("scrolling_dedications").ht(50),
+					c("live_polls_heading").addLabel("Live polls for next song"),
+					c("live_polls_list")
 
+				).occupy().setBgColor(Color.argb(100, 255, 255, 255));
+	}
 
+	public ABView getPollView() {
+		return v(h(c("poll_image").asImage(), v(c("poll_title").addLabel(""), c("poll_subtitle").addLabel("").asSubTitle())),
+				h(c("poll_percentage").ht(10).margin(10,10,10,10)).wgtSum(100)
+		);
+	}
 
 }
 	

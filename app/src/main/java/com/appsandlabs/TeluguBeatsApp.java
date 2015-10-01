@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 
 import com.appsandlabs.com.appsandlabs.helpers.ABTemplating;
 import com.appsandlabs.com.appsandlabs.helpers.UiUtils;
+import com.appsandlabs.datalisteners.GenericListener;
 import com.appsandlabs.enums.NotifificationProcessingState;
 import com.appsandlabs.telugubeats.MainActivity;
 import com.appsandlabs.telugubeats.R;
@@ -13,6 +14,7 @@ import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,8 +39,9 @@ public class TeluguBeatsApp extends Application {
     private static UiUtils uiUtils;
     private static Context applicationContext;
     private static FragmentActivity currentActivity;
-    private static ABTemplating abTemplating;
-
+    public static ABTemplating abTemplating;
+    public static GenericListener<float[]> onFFTData;
+    public static InputStream sfd_ser ;
     /**
      * Access to the global Analytics singleton. If this method returns null you forgot to either
      * set android:name="&lt;this.class.name&gt;" attribute on your application element in
@@ -60,6 +63,7 @@ public class TeluguBeatsApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        sfd_ser = getApplicationContext().getResources().openRawResource(R.raw.sfd);
         applicationContext = getApplicationContext();
         uiUtils = new UiUtils(this);
         abTemplating = new ABTemplating(this);
@@ -91,7 +95,7 @@ public class TeluguBeatsApp extends Application {
     }
 
     public static Context getContext() {
-        return applicationContext;
+        return currentActivity !=null ? currentActivity  : applicationContext;
     }
 
     public static FragmentActivity getCurrentActivity() {
@@ -117,4 +121,13 @@ public class TeluguBeatsApp extends Application {
     public static void onActivityCreated(FragmentActivity activity) {
         nActivities.incrementAndGet();
     }
+
+    public static void onActivityPaused(FragmentActivity activity){
+        currentActivity = null;
+    }
+
+    public static void onActivityResumed(FragmentActivity activity){
+        currentActivity = activity;
+    }
+
 }

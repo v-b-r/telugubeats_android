@@ -10,20 +10,30 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.os.IBinder;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.appsandlabs.TeluguBeatsApp;
+import com.appsandlabs.app.AppBaseFragmentActivity;
+import com.appsandlabs.com.appsandlabs.helpers.ABTemplating;
+import com.appsandlabs.com.appsandlabs.helpers.ServerCalls;
 import com.appsandlabs.datalisteners.GenericListener;
-import com.appsandlabs.datalisteners.TeluguBeatsConfig;
+import com.appsandlabs.datalisteners.GenericListener2;
+import com.appsandlabs.models.InitData;
+import com.appsandlabs.models.PollItem;
+import com.appsandlabs.models.Song;
+import com.appsandlabs.telugubeats.widgets.PollsListView;
+import com.squareup.picasso.Picasso;
 
-public class MainActivity extends FragmentActivity {
+import java.util.List;
+
+public class MainActivity extends AppBaseFragmentActivity {
 
 
     MusicService musicService;
@@ -38,7 +48,21 @@ public class MainActivity extends FragmentActivity {
     private float[] barHeightsRight = new float[VisualizerConfig.nBars];
     private View visualizerView;
     public ServiceConnection serviceConnection;
+    private ABTemplating.ABView layout;
 
+
+    public static class UiHandle{
+        ImageView playingImage;
+        TextView actorsList;
+        TextView directors;
+        TextView singersList;
+        TextView scrollingDedicationsList;
+        TextView currentUsersCount;
+        TextView pollsHeading;
+        PollsListView polls;
+    }
+
+    UiHandle uiHandle = new UiHandle();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +76,30 @@ public class MainActivity extends FragmentActivity {
 
         barPaint = new Paint();
         barPaint.setStrokeWidth(1);
-        barPaint.setShader(new LinearGradient(0, 0, 0, VisualizerConfig.barHeight, Color.BLUE, Color.argb(255, 200 , 200, 200), Shader.TileMode.MIRROR));
+        barPaint.setShader(new LinearGradient(0, 0, 0, VisualizerConfig.barHeight, Color.BLUE, Color.argb(255, 200, 200, 200), Shader.TileMode.MIRROR));
         barPaint.setStyle(Paint.Style.FILL);
 
+        ((LinearLayout)findViewById(R.id.fg)).addView(layout = TeluguBeatsApp.abTemplating.getPlayerAndPollsView());
+        layout.getCell("playingImage").addView(uiHandle.playingImage = new ImageView(this));
+        layout.getCell("singers").addView(uiHandle.singersList = new TextView(this));
+        layout.getCell("directors").addView(uiHandle.directors = new TextView(this));
+        layout.getCell("actors").addView(uiHandle.actorsList = new TextView(this));
+        uiHandle.scrollingDedicationsList  = layout.getCell("scrolling_dedications").getLabel();
+        uiHandle.currentUsersCount  = layout.getCell("live_users").getLabel();
+        uiHandle.pollsHeading  = layout.getCell("live_polls_heading").getLabel();
+        layout.getCell("live_polls_list").addView(uiHandle.polls = new PollsListView(this));
 
-        ((LinearLayout)findViewById(R.id.bg)).addView(visualizerView = new View(this) {
+        ServerCalls.loadInitData(new GenericListener<InitData>(){
+            @Override
+            public void onData(InitData data) {
+                uiHandle.polls.resetPolls(data.poll);
+                Picasso.with(MainActivity.this).load(data.song.album.imageUrl).into(uiHandle.playingImage);
+                //TODO:
+            }
+        });
+
+        ((LinearLayout) findViewById(R.id.bg)).addView(visualizerView = new View(this) {
+
             @Override
             protected void onDraw(Canvas canvas) {
                 float[] leftFft = fftDataLeft;
@@ -149,9 +192,9 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onResume() {
-        TeluguBeatsConfig.onFFTData = new GenericListener<float[]>(){
+        TeluguBeatsApp.onFFTData = new GenericListener<float[]>(){
             @Override
-            public String onData(float[] l , float[] r) {
+            public void onData(float[] l , float[] r) {
                 fftDataLeft = new float[l.length];
                 System.arraycopy(l, 0, fftDataLeft, 0, fftDataLeft.length);;
                 fftDataRight = new float[l.length];
@@ -159,7 +202,7 @@ public class MainActivity extends FragmentActivity {
 
                 if(visualizerView!=null)
                     visualizerView.postInvalidate();
-                return null;
+                return;
             }
         };
 
@@ -189,7 +232,7 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onPause() {
-        TeluguBeatsConfig.onFFTData = new GenericListener<>();
+        TeluguBeatsApp.onFFTData = new GenericListener<>();
         if(mBound) {
             unbindService(serviceConnection);
             mBound = false;

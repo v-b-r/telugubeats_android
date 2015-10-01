@@ -9,9 +9,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.appsandlabs.TeluguBeatsApp;
 import com.appsandlabs.audiotools.FFT;
 import com.appsandlabs.audiotools.TByteArrayOutputStream;
-import com.appsandlabs.datalisteners.TeluguBeatsConfig;
 
 import org.apache.commons.io.IOUtils;
 
@@ -84,7 +84,7 @@ public class MusicService extends Service {
     public void onDestroy() {
         Log.d("telugubeats_log", "destroy");
         done = true;
-        TeluguBeatsConfig.sfd_ser = null;
+        TeluguBeatsApp.sfd_ser = null;
         super.onDestroy();
     }
 
@@ -106,7 +106,7 @@ public class MusicService extends Service {
         public void run() {
                 try {
                     if(musicService.pause) return;
-                     URL url = new URL("http://192.168.0.102:8888/stream/telugu");
+                     URL url = new URL("http://192.168.0.103:8888/audio_stream/telugu");
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     musicService.decode(con.getInputStream());
                 } catch (IOException | DecoderException e) {
@@ -171,7 +171,7 @@ public class MusicService extends Service {
                             frames = 0;
                             audioLeft.reset();
                             audioRight.reset();
-                            if(TeluguBeatsConfig.onFFTData!=null) {
+                            if(TeluguBeatsApp.onFFTData!=null) {
                                 leftFft.forward(audioLeft.getBuffer());
                                 for (int i = 0; i < leftFft.specSize(); i++) {
                                     fftArrayLeft[i] = leftFft.getBand(i);
@@ -181,7 +181,7 @@ public class MusicService extends Service {
                                 for (int i = 0; i < rightFft.specSize(); i++) {
                                     fftArrayRight[i] = rightFft.getBand(i);
                                 }
-                                TeluguBeatsConfig.onFFTData.onData( fftArrayLeft, fftArrayRight);
+                                TeluguBeatsApp.onFFTData.onData( fftArrayLeft, fftArrayRight);
                             }
                         }
                         for (short s : pcm) {

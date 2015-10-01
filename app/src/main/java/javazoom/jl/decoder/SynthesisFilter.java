@@ -30,7 +30,7 @@
  */
 package javazoom.jl.decoder;
 
-import com.appsandlabs.datalisteners.TeluguBeatsConfig;
+import com.appsandlabs.TeluguBeatsApp;
 
 import java.io.IOException;
 
@@ -1620,7 +1620,7 @@ private void compute_pcm_samples(Obuffer buffer)
 		try
 		{
 			Class elemType = Float.TYPE;
-			Object o = JavaLayerUtils.deserializeArrayResource(TeluguBeatsConfig.sfd_ser, elemType, 512);
+			Object o = JavaLayerUtils.deserializeArrayResource(TeluguBeatsApp.sfd_ser, elemType, 512);
 			return (float[])o;
 		}
 		catch (IOException ex)
@@ -1642,8 +1642,7 @@ private void compute_pcm_samples(Obuffer buffer)
 	 * @return	An array of arrays in which each element in the returned
 	 *			array will be of length <code>blockSize</code>.
 	 */
-	static private float[][] splitArray(final float[] array, final int blockSize)
-	{
+	static private float[][] splitArray(final float[] array, final int blockSize){
 		int size = array.length / blockSize;
 		float[][] split = new float[size][];
 		for (int i=0; i<size; i++)

@@ -1,11 +1,11 @@
 package com.appsandlabs.datalisteners;
-public class GenericListener2<T1,T2,T3,T4> {
-	public void onData(T1 a, T2 b, T3 c){
-		
-	};
-	public void onData(T1 a, T2 b, T3 c,T4 d){
-		
-	};
-	
-	
+
+public class GenericListener2<T1 , T2>{
+
+
+	public void onData(T1 a , T2 b) {
+		// TODO Auto-generated method stub
+		return;
+	}
+
 }

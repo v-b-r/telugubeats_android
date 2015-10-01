@@ -30,6 +30,7 @@ repositories {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.google.code.gson:gson:2.3'
     compile files('libs/jl-dec-android.jar')
     compile files('libs/commons-io-2.4.jar')
     compile 'com.squareup.picasso:picasso:2.5.2'
@@ -38,4 +39,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-plus:7.5.0'
     compile 'com.google.android.gms:play-services-gcm:7.5.0'
     compile 'com.google.android.gms:play-services-analytics:7.5.0'
+    compile 'com.loopj.android:android-async-http:1.4.7'
+
 }

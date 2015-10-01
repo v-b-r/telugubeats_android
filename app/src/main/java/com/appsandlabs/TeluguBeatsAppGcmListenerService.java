@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.appsandlabs.app.Config;
 import com.google.android.gms.gcm.GcmListenerService;
-import com.quizapp.tollywood.configuration.Config;
 
 /**
  * Created by abhinav on 04/06/15.

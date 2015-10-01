@@ -1,24 +1,20 @@
 package com.appsandlabs.com.appsandlabs.helpers;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 
-import org.apache.http.Header;
-
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.util.Log;
-
 import com.appsandlabs.datalisteners.GenericListener;
+import com.appsandlabs.datalisteners.GenericListener2;
+import com.appsandlabs.models.InitData;
+import com.appsandlabs.models.PollItem;
+import com.appsandlabs.models.Song;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.google.gson.Gson;
+
+import org.apache.http.Header;
 
 
 class Item<T> {
@@ -56,13 +52,15 @@ class RandomSelector <T>{
 
 public class ServerCalls {
     public static final String CDN_PATH = "https://storage.googleapis.com/quizapp-tollywood/";
+    public static final String SERVER_ADDR = "http://192.168.0.103:8888";
+    static AsyncHttpClient client = new AsyncHttpClient();
+    static Gson gson = new Gson();
 
     public static void setUserGCMKey(final Context context, String registrationId, final GenericListener<Boolean> dataInputListener) {
 //		String url = SERVER_ADDR+"/func?task=setGCMRegistrationId";
 //		url+="&encodedKey="+UserDeviceManager.getEncodedKey(context)+"&regId="+registrationId;
 //
-//		AsyncHttpClient client  = new AsyncHttpClient();
-//		client.setMaxRetriesAndTimeout(3, 10);
+
 //
 //		final ServerNotifier serverNotifier = new ServerNotifier() {
 //			@Override
@@ -98,5 +96,20 @@ public class ServerCalls {
 //		});
 
 	}
+
+    public static void loadInitData(final GenericListener<InitData> listener) {
+        client.get(SERVER_ADDR + "/init_data/get", new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                InitData initData = gson.fromJson(responseBody.toString(), InitData.class);
+                listener.onData(initData);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+
+            }
+        });
+    }
 }
 

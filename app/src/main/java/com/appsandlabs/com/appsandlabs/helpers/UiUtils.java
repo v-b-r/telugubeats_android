@@ -58,6 +58,7 @@ import com.squareup.picasso.Transformation;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
@@ -388,6 +389,23 @@ public class UiUtils {
 			}
 		});
 	}
+
+
+	public int  generateRandomColor(int mix) {
+		Random random = new Random();
+		int red = random.nextInt(256);
+		int green = random.nextInt(256);
+		int blue = random.nextInt(256);
+
+		// mix the color
+		red = (red + Color.red(mix)) / 2;
+		green = (green + Color.green(mix)) / 2;
+		blue = (blue + Color.blue(mix)) / 2;
+
+		int color =  Color.argb(255,red, green, blue);
+		return color;
+	}
+
 
 	public static void into(RequestCreator requestCreator, ImageView imageView, Callback callback) {
 		  boolean mainThread = Looper.myLooper() == Looper.getMainLooper();

@@ -1,13 +1,10 @@
 package com.appsandlabs.app;
 
-import android.content.Context;
-import android.content.Intent;
-
 /**
  * Created by abhinav on 9/27/15.
  */
 public class Config {
-    public static final boolean IS_TEST_BUILD = true;
+    public static final boolean IS_TEST_BUILD = false;
     public static final String GCM_SAVED = "gcm_saved";
     public static final String APP_LOADING_VIEW_IMAGE = null;
     public static final String REGISTRATION_COMPLETE = "registration_complete";
@@ -16,4 +13,4 @@ public class Config {
     public static final int NOTIFICATION_ID = 12323;
     public static final String NOTIFICATION_KEY_MESSAGE_TYPE = "messageType";
     public static final String NOTIFICATION_KEY_TEXT_MESSAGE = "message";
-}
+    public static final String GCM_NOTIFICATION_INTENT_ACTION = "com.appsandlabs.gcmnotification";}

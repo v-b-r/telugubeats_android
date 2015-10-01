@@ -6,14 +6,15 @@ import android.view.View;
 public class GenericListener<T>{
 
 
-	public String onData(T s) {
+	public void onData(T s) {
 		// TODO Auto-generated method stub
-		return null;
+		return ;
 	}
-	
 
-	public String onData(T a, T b) {
-		return null;
+
+	public void onData(T a, T b) {
+		return ;
 	}
 
 }
+
