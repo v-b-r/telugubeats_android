@@ -560,7 +560,7 @@ public class ABTemplating {
         ret.setOrientation(LinearLayout.HORIZONTAL);
 //			ret.registerInnerViews(views); //add view registers it now
         for (ABView view : views) {
-            if (view.getLayoutParams() != null && ((LayoutParams) view.getLayoutParams()).weight == 0)// if weight set , we had set its width to 0 , hence don't set
+            if (view.getLayoutParams() != null && ((LayoutParams) view.getLayoutParams()).weight == 0 && view.width==0)// if weight set , we had set its width to 0 , hence don't set
                 view.wd(LayoutParams.WRAP_CONTENT);
             ret.addView(view);
         }
@@ -673,7 +673,7 @@ public class ABTemplating {
 
 	public ABView getPollView() {
 		return v(
-				h(c("poll_image").asImage().sz(50, 50), v(
+				h(c("poll_image").asImage().sz(30, 30), v(
 											c("poll_title").addLabel(""),
 											c("poll_subtitle").addLabel("").asSubTitle()
 										)

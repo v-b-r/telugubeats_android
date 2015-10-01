@@ -4,7 +4,7 @@ package com.appsandlabs.app;
  * Created by abhinav on 9/27/15.
  */
 public class Config {
-    public static final boolean IS_TEST_BUILD = true;
+    public static final boolean IS_TEST_BUILD = false;
     public static final String GCM_SAVED = "gcm_saved";
     public static final String APP_LOADING_VIEW_IMAGE = null;
     public static final String REGISTRATION_COMPLETE = "registration_complete";
