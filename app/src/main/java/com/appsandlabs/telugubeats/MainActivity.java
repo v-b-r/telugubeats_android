@@ -24,14 +24,9 @@ import com.appsandlabs.app.AppBaseFragmentActivity;
 import com.appsandlabs.com.appsandlabs.helpers.ABTemplating;
 import com.appsandlabs.com.appsandlabs.helpers.ServerCalls;
 import com.appsandlabs.datalisteners.GenericListener;
-import com.appsandlabs.datalisteners.GenericListener2;
 import com.appsandlabs.models.InitData;
-import com.appsandlabs.models.PollItem;
-import com.appsandlabs.models.Song;
 import com.appsandlabs.telugubeats.widgets.PollsListView;
 import com.squareup.picasso.Picasso;
-
-import java.util.List;
 
 public class MainActivity extends AppBaseFragmentActivity {
 
@@ -93,7 +88,7 @@ public class MainActivity extends AppBaseFragmentActivity {
             @Override
             public void onData(InitData data) {
                 uiHandle.polls.resetPolls(data.poll);
-                Picasso.with(MainActivity.this).load(data.song.album.imageUrl).into(uiHandle.playingImage);
+                Picasso.with(MainActivity.this).load(data.currentSong.album.imageUrl).into(uiHandle.playingImage);
                 //TODO:
             }
         });
@@ -185,7 +180,7 @@ public class MainActivity extends AppBaseFragmentActivity {
         }, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
 
         // load current polls and poll data
-        // get current playing song
+        // get current playing currentSong
         // get current
     }
 

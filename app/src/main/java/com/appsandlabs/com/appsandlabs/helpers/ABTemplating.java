@@ -32,6 +32,10 @@ import java.util.Map.Entry;
 public class ABTemplating {
 
 
+	private static final int CENTER_VERTICAL = Gravity.CENTER_VERTICAL;
+	private static final int RIGHT = Gravity.RIGHT;
+	private static final int CENTER_HORIZONTAL = Gravity.CENTER_HORIZONTAL;
+
 	static int MATCH_PARENT = LayoutParams.MATCH_PARENT;
 	int WRAP_CONTENT = LayoutParams.WRAP_CONTENT;
 //
@@ -66,6 +70,8 @@ public class ABTemplating {
 		private TextView label;
 		private ImageView iconView;
 		private ImageView imageView;
+		private int height = LayoutParams.WRAP_CONTENT;
+		private int width =  LayoutParams.WRAP_CONTENT;
 
 		public ABView(String id) {
 			super(TeluguBeatsApp.getContext(), null);
@@ -156,9 +162,11 @@ public class ABTemplating {
 				width = (int)getInDp(width);
 
 			if (this.getLayoutParams() == null)
-				this.setLayoutParams(new LayoutParams(width, getHeight() == 0 ? LayoutParams.WRAP_CONTENT : getHeight()));
+				this.setLayoutParams(new LayoutParams(width, height));
 			else
 				((LayoutParams) this.getLayoutParams()).width = width;
+
+			this.width = width;
 			return this;
 		}
 
@@ -175,15 +183,16 @@ public class ABTemplating {
 			if(height>0)
 				height = (int)getInDp(height);
 			if (this.getLayoutParams() == null)
-				this.setLayoutParams(new LayoutParams(getWidth() == 0 ? LayoutParams.WRAP_CONTENT : getWidth(), height));
+				this.setLayoutParams(new LayoutParams(width , height));
 			else
 				((LayoutParams) this.getLayoutParams()).height = height;
+			this.height = height;
 			return this;
 		}
 
 		public ABView wgt(float weight) {
-			if (this.getLayoutParams() == null || (getHeight() == 0 && getWidth() == 0))
-				this.setLayoutParams(new LayoutParams(0, LayoutParams.WRAP_CONTENT));
+			if (this.getLayoutParams() == null)
+				this.setLayoutParams(new LayoutParams(0, height));
 
 			((LayoutParams) this.getLayoutParams()).width = 0;
 			((LayoutParams) this.getLayoutParams()).weight = weight;
@@ -218,18 +227,30 @@ public class ABTemplating {
 			return this;
 		}
 
+		public ABView asHeader(){
+			if(label != null) {
+				label.setTextColor(Color.BLACK);
+				label.setTextSize(15);
+				label.setTypeface(null , Typeface.BOLD);
+				((LinearLayout.LayoutParams)label.getLayoutParams()).gravity = CENTER_HORIZONTAL;
+			}
+			return this;
+		}
 
 
 		public ABView addLabel(String string, float textSizeSp, boolean wrapLayout, boolean bold) {
 			if(label==null) {
 				label = new TextView(getContext(), null);
-				this.addView(label);
+				super.addView(label);
 			}
 			label.setText(string);
 	        label.setSingleLine();
 			if(textSizeSp!=-1)
-				label.setTextSize(textSizeSp* getInDp(1));
-			this.setPadding(15, 0, 0, 15);
+				label.setTextSize(textSizeSp);
+			else{
+				label.setTextSize(12);
+			}
+			this.setPadding(10, 0, 0, 10);
 			if(wrapLayout)
 				this.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 			else{
@@ -237,8 +258,8 @@ public class ABTemplating {
 			}
 			if(bold) {
 				label.setTypeface(null, Typeface.BOLD);
-				label.setTextColor(Color.BLACK);
 			}
+			label.setTextColor(Color.BLACK);
 			this.setGravity(Gravity.CENTER_VERTICAL);
 			return this;
 		}
@@ -640,20 +661,25 @@ public class ABTemplating {
 									h(c().addLabel("Singers"), c("singers")),
 									h(c().addLabel("Actors"), c("actors")),
 									h(c().addLabel("Director"), c("directors"))
-							)
-					),
+							).wd(MATCH_PARENT)
+					).padding(10, 10 , 10 , 10),
 					h(c("live_users").addLabel("1000 live users").wgt(0.5f), c("whats_app_dedicate").wgt(0.5f)),
 					c("scrolling_dedications").ht(50),
-					c("live_polls_heading").addLabel("Live polls for next song"),
+					c("live_polls_heading").addLabel("Live polls for next song").asHeader(),
 					c("live_polls_list")
 
 				).occupy().setBgColor(Color.argb(100, 255, 255, 255));
 	}
 
 	public ABView getPollView() {
-		return v(h(c("poll_image").asImage(), v(c("poll_title").addLabel(""), c("poll_subtitle").addLabel("").asSubTitle())),
-				h(c("poll_percentage").ht(10).margin(10,10,10,10)).wgtSum(100)
-		);
+		return v(
+				h(c("poll_image").asImage().sz(50, 50), v(
+											c("poll_title").addLabel(""),
+											c("poll_subtitle").addLabel("").asSubTitle()
+										)
+				),
+				h(c("poll_percentage").ht(5).lgty(CENTER_VERTICAL), c("poll_count").addLabel("").asSubTitle().gty(CENTER_VERTICAL)).ht(25)
+		).setBg(R.drawable.card).padding(20, 10, 20, 10);
 	}
 
 }

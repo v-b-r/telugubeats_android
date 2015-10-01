@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Random;
 
 import android.content.Context;
+import android.util.Log;
+
 import com.appsandlabs.datalisteners.GenericListener;
 import com.appsandlabs.datalisteners.GenericListener2;
 import com.appsandlabs.models.InitData;
@@ -54,6 +56,10 @@ public class ServerCalls {
     public static final String CDN_PATH = "https://storage.googleapis.com/quizapp-tollywood/";
     public static final String SERVER_ADDR = "http://192.168.0.103:8888";
     static AsyncHttpClient client = new AsyncHttpClient();
+    static {
+        client.setMaxRetriesAndTimeout(3, 1000);
+        client.setTimeout(4000);
+    }
     static Gson gson = new Gson();
 
     public static void setUserGCMKey(final Context context, String registrationId, final GenericListener<Boolean> dataInputListener) {
@@ -101,13 +107,13 @@ public class ServerCalls {
         client.get(SERVER_ADDR + "/init_data/get", new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                InitData initData = gson.fromJson(responseBody.toString(), InitData.class);
+                InitData initData = gson.fromJson(new String(responseBody), InitData.class);
                 listener.onData(initData);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-
+                Log.d("telugubeats", error.toString());
             }
         });
     }

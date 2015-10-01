@@ -7,13 +7,11 @@ import java.util.List;
 /**
  * Created by abhinav on 10/1/15.
  */
-public class Album {
-    public String albumId;
+public class Album extends  BaseModel{
     public String name;
     public List<String> directors;
     public List<String> actors;
-
-    @SerializedName("music_director")
+    @SerializedName("music_directors")
     public List<String> musicDirectors;
     public String imageUrl;
 }

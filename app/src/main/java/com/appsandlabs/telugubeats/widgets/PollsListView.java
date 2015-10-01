@@ -27,21 +27,28 @@ public class PollsListView extends ListView {
 
     public PollsListView(final Context context) {
         super(context);
-        setAdapter(new ArrayAdapter<PollItem>(context, -1 , polls = new ArrayList<PollItem>()){
+        setAdapter(new ArrayAdapter<PollItem>(context, -1, polls = new ArrayList<PollItem>()) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 PollItem poll = getItem(position);
                 ABTemplating.ABView pollView = (ABTemplating.ABView) convertView;
-                if(convertView==null){
+                if (pollView == null) {
                     pollView = TeluguBeatsApp.abTemplating.getPollView();
                 }
                 Picasso.with(context).load(poll.song.album.imageUrl).into(pollView.getCell("poll_image").getImage());
                 pollView.getCell("poll_title").getLabel().setText(poll.song.title + " - " + poll.song.album.name);
                 pollView.getCell("poll_subtitle").getLabel().setText(TextUtils.join(", ", poll.song.singers));
-                pollView.getCell("poll_percentage").wgt(poll.pollCount*1.0f/total *100);
-                return convertView;
+                float pollPercentage = (poll.pollCount * 1.0f) / total;
+                pollView.getCell("poll_percentage").wgt(pollPercentage);
+                pollView.getCell("poll_percentage").setBackgroundColor(poll.color);
+                pollView.getCell("poll_count").getLabel().setText(poll.pollCount + "");
+                pollView.getCell("poll_count").wgt(1.0f - pollPercentage);
+                pollView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                return pollView;
             }
+
         });
+        setDivider(null);
     }
 
     public int caulculateTotalPolls(){
@@ -51,15 +58,14 @@ public class PollsListView extends ListView {
         }
         return total;
     }
+
     public void resetPolls(Poll poll){
         this.polls.clear();
-        caulculateTotalPolls();
         for(PollItem pollItem : poll.pollItems){
             this.polls.add(pollItem);
             pollItem.color = TeluguBeatsApp.getUiUtils().generateRandomColor(Color.WHITE);
         }
+        caulculateTotalPolls();
         ((ArrayAdapter)getAdapter()).notifyDataSetChanged();
     }
-
-
 }
