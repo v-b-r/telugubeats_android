@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.appsandlabs.app.Config;
-import com.appsandlabs.com.appsandlabs.helpers.UiUtils;
+import com.appsandlabs.helpers.UiUtils;
 import com.appsandlabs.datalisteners.GenericListener;
 import com.appsandlabs.enums.NotifificationProcessingState;
 import com.google.gson.Gson;

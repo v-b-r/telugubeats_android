@@ -123,7 +123,7 @@ public class UserDeviceManager {
 		ImageView headerImageView = new ImageView(context);
 		if(Config.APP_LOADING_VIEW_IMAGE==null || Config.APP_LOADING_VIEW_IMAGE.trim().isEmpty()){
 
-			app.getUiUtils().setBg(headerImageView , context.getResources().getDrawable(R.drawable.ic_launcher));
+			app.getUiUtils().setBg(headerImageView , context.getResources().getDrawable(R.drawable.logo));
 		}
 		else{
 			app.getUiUtils().loadImageIntoView(context, headerImageView, Config.APP_LOADING_VIEW_IMAGE, true);

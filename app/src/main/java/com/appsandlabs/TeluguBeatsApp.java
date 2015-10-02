@@ -4,11 +4,13 @@ import android.app.Application;
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 
-import com.appsandlabs.com.appsandlabs.helpers.ABTemplating;
-import com.appsandlabs.com.appsandlabs.helpers.UiUtils;
+import com.appsandlabs.helpers.ABTemplating;
+import com.appsandlabs.helpers.UiUtils;
 import com.appsandlabs.datalisteners.GenericListener;
 import com.appsandlabs.enums.NotifificationProcessingState;
-import com.appsandlabs.telugubeats.MainActivity;
+import com.appsandlabs.interfaces.AppEventListener;
+import com.appsandlabs.models.Poll;
+import com.appsandlabs.models.Song;
 import com.appsandlabs.telugubeats.R;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
@@ -17,6 +19,7 @@ import com.google.android.gms.analytics.Tracker;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -42,6 +45,13 @@ public class TeluguBeatsApp extends Application {
     public static ABTemplating abTemplating;
     public static GenericListener<float[]> onFFTData;
     public static InputStream sfd_ser ;
+    private static UserDeviceManager userDeviceManager;
+
+
+
+    public static Poll currentPoll= null;
+    public static Song currentSong;
+
     /**
      * Access to the global Analytics singleton. If this method returns null you forgot to either
      * set android:name="&lt;this.class.name&gt;" attribute on your application element in
@@ -60,12 +70,15 @@ public class TeluguBeatsApp extends Application {
         return tracker;
     }
 
+
+
     @Override
     public void onCreate() {
         super.onCreate();
         sfd_ser = getApplicationContext().getResources().openRawResource(R.raw.sfd);
         applicationContext = getApplicationContext();
         uiUtils = new UiUtils(this);
+        userDeviceManager = new UserDeviceManager(this);
         abTemplating = new ABTemplating(this);
         nActivities = new AtomicInteger(0);
 
@@ -93,7 +106,9 @@ public class TeluguBeatsApp extends Application {
     public static UiUtils getUiUtils() {
         return uiUtils;
     }
-
+    public static UserDeviceManager getUserDeviceManager() {
+        return userDeviceManager;
+    }
     public static Context getContext() {
         return currentActivity !=null ? currentActivity  : applicationContext;
     }
@@ -107,6 +122,7 @@ public class TeluguBeatsApp extends Application {
         uiUtils = null;
         applicationContext = null;
         currentActivity = null;
+        eventListeners.clear();
     }
 
 
@@ -129,5 +145,102 @@ public class TeluguBeatsApp extends Application {
     public static void onActivityResumed(FragmentActivity activity){
         currentActivity = activity;
     }
+
+
+
+
+    public enum AppEvent {
+        NONE;
+
+        public Object getValue() {
+            return value;
+        }
+
+        Object value;
+
+        public AppEvent setValue(Object val){
+            this.value = val;
+            return this;
+        }
+
+    }
+    static HashMap<String, List<AppEventListener>> eventListeners = new HashMap<String, List<AppEventListener>>();
+
+    private static synchronized  void addListener(String id , AppEventListener listener){
+        if(eventListeners.get(id)==null){
+            eventListeners.put(id, new ArrayList<AppEventListener>());
+        }
+        eventListeners.get(id).add(listener);
+
+    }
+
+    public static synchronized void removeListener(String id, AppEventListener listener){
+        if (eventListeners.get(id) == null) {
+            return;
+        }
+        eventListeners.get(id).remove(listener);
+    }
+
+
+    public static void removeListeners(AppEvent event, String permission) {
+        String id = event.toString() + (permission == null ? "" : permission);
+        eventListeners.remove(id);
+    }
+
+
+    public synchronized  void addListener(AppEvent type, AppEventListener listener){
+        addListener(type.toString(), listener);
+    }
+
+
+    public static synchronized  void addListener(AppEvent type, String permission, AppEventListener listener){
+        String listenerId = type.toString()+permission;
+        addListener(listenerId, listener);
+    }
+
+
+    public static synchronized void removeListener(AppEvent type, AppEventListener listener) {
+        removeListener(type.toString(), listener);
+    }
+
+    public synchronized void removeListener(AppEvent type, String permission , AppEventListener listener) {
+        String listenerId = type.toString()+permission;
+        removeListener(listenerId, listener);
+    }
+
+    public static synchronized void broadcastEvent(AppEvent type , Object data){
+        String id = type.toString();
+        if (eventListeners.get(id) == null) {
+            return;
+        }
+        for(AppEventListener listener : eventListeners.get(id)){
+            sendBroadcast(listener, type, data);
+        }
+    }
+    public static void sendBroadcast(final AppEventListener listener, final AppEvent type, final Object data){
+        if(getCurrentActivity()!=null) {
+            getCurrentActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    listener.onEvent(type, data);
+                }
+            });
+        }
+        else {
+            listener.onEvent(type, data);
+        }
+    }
+
+    public static synchronized void broadcastEvent(AppEvent type ,String permission , Object data){
+        String id = type.toString()+permission;
+        if (eventListeners.get(id) == null) {
+            return;
+        }
+        for(AppEventListener listener : eventListeners.get(id)){
+            sendBroadcast(listener , type, data);
+        }
+    }
+
+
 
 }

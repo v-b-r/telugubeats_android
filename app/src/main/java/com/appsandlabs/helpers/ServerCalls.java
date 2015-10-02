@@ -1,4 +1,4 @@
-package com.appsandlabs.com.appsandlabs.helpers;
+package com.appsandlabs.helpers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +8,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.appsandlabs.datalisteners.GenericListener;
-import com.appsandlabs.datalisteners.GenericListener2;
 import com.appsandlabs.models.InitData;
-import com.appsandlabs.models.PollItem;
-import com.appsandlabs.models.Song;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.google.gson.Gson;

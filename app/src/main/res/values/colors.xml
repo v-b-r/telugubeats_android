@@ -2,15 +2,16 @@
 <resources>
     <color name="translucent_black">#AA000000</color>
     <color name="translucent_white">#AAFFFFFF</color>
-    <color name="default_bg">#c4c4c4</color>
+    <color name="default_bg">#FFFFFF</color>
     <color name="red">#ffff0000</color>
 
 
     <color name="transparent">#00000000</color>
     <!-- card colors -->
-    <color name="card_background">#ffffff</color>
+    <color name="card_background">#eeeeee</color>
     <color name="card_shadow_1">#d4d4d4</color>
     <color name="card_shadow_2">#dddddd</color>
+    <color name="neon_blue">#67C8FF</color>
     <color name="card_detailing">#eee</color>
 
 </resources>

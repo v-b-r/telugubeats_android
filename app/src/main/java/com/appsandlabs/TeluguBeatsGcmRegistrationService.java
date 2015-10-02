@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.appsandlabs.app.Config;
-import com.appsandlabs.com.appsandlabs.helpers.ServerCalls;
+import com.appsandlabs.helpers.ServerCalls;
 import com.appsandlabs.datalisteners.GenericListener;
 import com.appsandlabs.telugubeats.R;
 import com.google.android.gms.gcm.GcmPubSub;

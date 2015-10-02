@@ -1,4 +1,4 @@
-package com.appsandlabs.com.appsandlabs.helpers;
+package com.appsandlabs.helpers;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -33,7 +33,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -56,8 +55,6 @@ import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Transformation;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -219,7 +216,17 @@ public class UiUtils {
 	    	view.setBackgroundDrawable(drawable);
 	    }
 	}
-	
+
+	@SuppressLint("NewApi")
+	public static void setBg(final View view , String url){
+		getRequestCreatorTask(url , false).onSuccess(new Continuation<RequestCreator, Void>() {
+			@Override
+			public Void then(Task<RequestCreator> task) throws Exception {
+				view.setBackground(new BitmapDrawable(view.getContext().getResources(),task.getResult().get()));;
+				return null;
+			}
+		}, Task.UI_THREAD_EXECUTOR);
+	}
 	
 	public Timer setInterval(int millis , final GenericListener<Integer> listener) {
 		// TODO Auto-generated constructor stub

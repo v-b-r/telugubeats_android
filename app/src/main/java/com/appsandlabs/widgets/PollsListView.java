@@ -1,4 +1,4 @@
-package com.appsandlabs.telugubeats.widgets;
+package com.appsandlabs.widgets;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -6,21 +6,19 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.appsandlabs.TeluguBeatsApp;
-import com.appsandlabs.com.appsandlabs.helpers.ABTemplating;
+import com.appsandlabs.helpers.ABTemplating;
 import com.appsandlabs.models.Poll;
 import com.appsandlabs.models.PollItem;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by abhinav on 10/1/15.
  */
-public class PollsListView extends ListView {
+public class PollsListView extends ExpandableHeightListView {
 
     private final ArrayList<PollItem> polls;
     private int total = 0;
@@ -49,6 +47,8 @@ public class PollsListView extends ListView {
 
         });
         setDivider(null);
+        setExpanded(true);
+        setScrollContainer(false);
     }
 
     public int caulculateTotalPolls(){

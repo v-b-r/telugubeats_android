@@ -5,8 +5,8 @@ package com.appsandlabs.telugubeats;
  */
 public class VisualizerConfig {
 
-    static public int nBars = 32;
-    static public int barHeight = 256;
+    static public int nBars = 16;
+    static public int barHeight = 150;
     static public int barSpacing  = 4;
     static public int barWidth = 16;
     public static int hLines = 16;

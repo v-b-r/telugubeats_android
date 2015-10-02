@@ -1,4 +1,4 @@
-package com.appsandlabs.com.appsandlabs.helpers;
+package com.appsandlabs.helpers;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -212,12 +212,20 @@ public class ABTemplating {
 			return addLabel(string, -1, true, true) ;
 		}
 
-		public ABView setLabelColor(int color){
+		public ABView txtColor(int color){
 			if(label !=null){
 				label.setTextColor(color);
 			}
 			return this;
 		}
+
+		public ABView txtSize(float i) {
+			if(label !=null){
+				label.setTextSize(i);
+			}
+			return this;
+		}
+
 
 		public ABView asSubTitle(){
 			if(label != null) {
@@ -231,8 +239,7 @@ public class ABTemplating {
 			if(label != null) {
 				label.setTextColor(Color.BLACK);
 				label.setTextSize(15);
-				label.setTypeface(null , Typeface.BOLD);
-				((LinearLayout.LayoutParams)label.getLayoutParams()).gravity = CENTER_HORIZONTAL;
+				label.setTypeface(null, Typeface.BOLD);
 			}
 			return this;
 		}
@@ -656,29 +663,30 @@ public class ABTemplating {
 	}
 
 	public ABView getPlayerAndPollsView(){
-		return v(
-					h(c("playingImage"), v(
-									h(c().addLabel("Singers"), c("singers")),
-									h(c().addLabel("Actors"), c("actors")),
-									h(c().addLabel("Director"), c("directors"))
+		return v(true,
+					h(c("playingImage").sz(100, 100), v(
+									h(c().addLabel("Singers").wgt(0.3f), c("singers").wgt(0.7f)),
+									h(c().addLabel("Actors").wgt(0.3f), c("actors").wgt(0.7f)),
+									h(c().addLabel("Director").wgt(0.3f), c("directors").wgt(0.7f))
 							).wd(MATCH_PARENT)
 					).padding(10, 10 , 10 , 10),
 					h(c("live_users").addLabel("1000 live users").wgt(0.5f), c("whats_app_dedicate").wgt(0.5f)),
+				c("visualizer"),
 					c("scrolling_dedications").ht(50),
-					c("live_polls_heading").addLabel("Live polls for next song").asHeader(),
-					c("live_polls_list")
+					c("live_polls_heading").addLabel("Live polls for next song").asHeader().gty(CENTER_HORIZONTAL),
+				c("live_polls_list")
 
-				).occupy().setBgColor(Color.argb(100, 255, 255, 255));
+		).occupy().setBgColor(Color.argb(100, 255, 255, 255));
 	}
 
 	public ABView getPollView() {
 		return v(
-				h(c("poll_image").asImage().sz(30, 30), v(
+				h(c("poll_image").asImage().sz(50, 50), v(
 											c("poll_title").addLabel(""),
 											c("poll_subtitle").addLabel("").asSubTitle()
 										)
 				),
-				h(c("poll_percentage").ht(5).lgty(CENTER_VERTICAL), c("poll_count").addLabel("").asSubTitle().gty(CENTER_VERTICAL)).ht(25)
+				h(c("poll_percentage").ht(5).lgty(CENTER_VERTICAL), c("poll_count").addLabel("").txtSize(14).lgty(CENTER_VERTICAL)).ht(25)
 		).setBg(R.drawable.card).padding(20, 10, 20, 10);
 	}
 

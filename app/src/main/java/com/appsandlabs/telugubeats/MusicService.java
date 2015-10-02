@@ -95,10 +95,16 @@ public class MusicService extends Service {
 
     //music running thread , it just runs with a pause and stop methods
     public static class MusicPlayThread extends Thread{
-        private final MusicService musicService;
+        private MusicService musicService;
+        private String streamId = "telugu";
+
 
         MusicPlayThread(MusicService service){
+            this(service, "telugu");
+        }
+        MusicPlayThread(MusicService service , String streamId){
             musicService = service;
+            this.streamId = streamId;
         }
 
 
@@ -106,13 +112,24 @@ public class MusicService extends Service {
         public void run() {
                 try {
                     if(musicService.pause) return;
-                     URL url = new URL("http://192.168.0.103:8888/audio_stream/telugu");
+                     URL url = new URL("http://192.168.0.103:8888/audio_stream/"+streamId);
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     musicService.decode(con.getInputStream());
                 } catch (IOException | DecoderException e) {
                     Log.d("telugubeats_log", "some error in thread");
                     e.printStackTrace();
                 }
+        }
+
+        public void restartStream(String streamId){
+            musicService.done = true;
+            this.streamId = streamId;
+            try {
+                join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            start();
         }
     }
 
