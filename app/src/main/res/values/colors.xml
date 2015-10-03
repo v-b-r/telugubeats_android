@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="translucent_black">#AA000000</color>
-    <color name="translucent_white">#AAFFFFFF</color>
+    <color name="translucent_white">#99FFFFFF</color>
     <color name="default_bg">#FFFFFF</color>
     <color name="red">#ffff0000</color>
 
@@ -13,5 +13,7 @@
     <color name="card_shadow_2">#dddddd</color>
     <color name="neon_blue">#67C8FF</color>
     <color name="card_detailing">#eee</color>
-
+    <color name="black">#000000</color>
+    <color name="less_black">#444444</color>
+    <color name="malachite">#108070</color>
 </resources>

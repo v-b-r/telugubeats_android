@@ -30,7 +30,7 @@
  */
 package javazoom.jl.decoder;
 
-import com.appsandlabs.TeluguBeatsApp;
+import com.appsandlabs.telugubeats.TeluguBeatsApp;
 
 import java.io.IOException;
 

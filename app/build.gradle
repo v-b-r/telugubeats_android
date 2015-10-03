@@ -41,4 +41,9 @@ dependencies {
     compile 'com.google.android.gms:play-services-analytics:7.5.0'
     compile 'com.loopj.android:android-async-http:1.4.7'
 
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:support-v4:22.2.1'
+    compile 'com.android.support:design:22.2.1'
+
+
 }
