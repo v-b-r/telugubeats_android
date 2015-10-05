@@ -17,7 +17,7 @@ import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.models.Poll;
 import com.appsandlabs.telugubeats.models.PollItem;
 import com.appsandlabs.telugubeats.response_models.PollsChanged;
-import com.appsandlabs.telugubeats.activities.R;
+import com.appsandlabs.telugubeats.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -37,8 +37,8 @@ public class PollsListView extends ListView {
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-            PollItem poll = (PollItem) msg.obj;
-            ServerCalls.sendPoll(poll, new GenericListener<Boolean>() {
+            PollItem pollItem = (PollItem) msg.obj;
+            ServerCalls.sendPoll(pollItem, new GenericListener<Boolean>() {
                 @Override
                 public void onData(Boolean a) {
                     //TOOD:okay
@@ -65,14 +65,15 @@ public class PollsListView extends ListView {
                 pollView.getCell("poll_subtitle3").getLabel().setText(TextUtils.join(", ", poll.song.album.actors));
                 float pollPercentage = (poll.pollCount * 1.0f) / total;
                 pollView.getCell("poll_percentage").wgt(pollPercentage);
+                pollView.getCell("poll_count").getLabel().setText(poll.pollCount==0?" 0" : " "+poll.pollCount);
+                //pollView.getCell("dummy").wgt(1.0f - pollPercentage);
                 pollView.getCell("poll_percentage").setBackgroundColor(poll.color);
-                pollView.getCell("poll_count").getLabel().setText(poll.pollCount + "");
-                pollView.getCell("poll_count").wgt(1.0f - pollPercentage);
                 final ABTemplating.ABView finalPollView = pollView;
 
                 pollView.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if(poll.isVoted) return;
                         doUserPoll(poll);
                         finalPollView.getCell("voted").setBackgroundColor(getColorFromResource(R.color.malachite));
 

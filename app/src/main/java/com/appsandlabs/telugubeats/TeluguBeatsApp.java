@@ -5,14 +5,14 @@ import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 
 import com.appsandlabs.telugubeats.activities.AppBaseFragmentActivity;
-import com.appsandlabs.telugubeats.helpers.ABTemplating;
-import com.appsandlabs.telugubeats.helpers.UiUtils;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
 import com.appsandlabs.telugubeats.enums.NotifificationProcessingState;
+import com.appsandlabs.telugubeats.helpers.ABTemplating;
+import com.appsandlabs.telugubeats.helpers.UiUtils;
 import com.appsandlabs.telugubeats.interfaces.AppEventListener;
 import com.appsandlabs.telugubeats.models.Poll;
 import com.appsandlabs.telugubeats.models.Song;
-import com.appsandlabs.telugubeats.activities.R;
+import com.appsandlabs.telugubeats.models.User;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -53,7 +53,8 @@ public class TeluguBeatsApp extends Application {
 
     public static Poll currentPoll= null;
     public static Song currentSong;
-    public Gson gson = new Gson();
+    public static Gson gson = new Gson();
+    public static User currentUser;
 
     /**
      * Access to the global Analytics singleton. If this method returns null you forgot to either

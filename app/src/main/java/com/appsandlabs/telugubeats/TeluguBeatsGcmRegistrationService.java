@@ -5,13 +5,11 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.appsandlabs.telugubeats.config.Config;
-import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
-import com.appsandlabs.telugubeats.activities.R;
+import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
-
 
 import java.io.IOException;
 

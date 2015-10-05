@@ -4,6 +4,8 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
 
 
+    <dimen name="normal_padding">16dip</dimen>
+
     <dimen name="one_dp">1dp</dimen>
     <dimen name="one_sp">1sp</dimen>
 </resources>

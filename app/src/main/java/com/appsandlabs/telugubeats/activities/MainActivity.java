@@ -15,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.appsandlabs.telugubeats.R;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
 import com.appsandlabs.telugubeats.fragments.CurrentSongAndEventsFragment;
@@ -48,6 +49,8 @@ public class MainActivity extends AppBaseFragmentActivity {
                     public void onData(InitData data) {
                         TeluguBeatsApp.currentPoll = data.poll;
                         TeluguBeatsApp.currentSong = data.currentSong;
+                        TeluguBeatsApp.currentUser = data.user;
+
                         init(data);
                     }
                 });
@@ -70,6 +73,7 @@ public class MainActivity extends AppBaseFragmentActivity {
             }
         });
 
+      ServerCalls.readEvents();
     }
 
 

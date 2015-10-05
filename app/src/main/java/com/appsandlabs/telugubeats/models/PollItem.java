@@ -13,5 +13,8 @@ public class PollItem extends  BaseModel{
     public int pollCount;
     public Song song;
     public int color;
+
+    @SerializedName("is_voted")
     public boolean isVoted;
+    public Id poll;
 }

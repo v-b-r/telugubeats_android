@@ -16,6 +16,10 @@ public class BaseModel {
         public String toString() {
             return $oid;
         }
+
+        public String getId(){
+            return $oid==null?"":$oid;
+        }
     }
 
     @SerializedName("_id")

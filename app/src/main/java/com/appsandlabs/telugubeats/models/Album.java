@@ -13,5 +13,6 @@ public class Album extends  BaseModel{
     public List<String> actors;
     @SerializedName("music_directors")
     public List<String> musicDirectors;
+    @SerializedName("image_url")
     public String imageUrl;
 }

@@ -5,7 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.appsandlabs.telugubeats.activities.R;
+import com.appsandlabs.telugubeats.R;
 
 
 /**

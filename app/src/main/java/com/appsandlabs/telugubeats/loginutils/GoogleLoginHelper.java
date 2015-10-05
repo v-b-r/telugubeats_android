@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.UiText;
+import com.appsandlabs.telugubeats.UserDeviceManager;
 import com.appsandlabs.telugubeats.config.Config;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener4;
@@ -44,7 +45,6 @@ import java.util.Locale;
  */
 public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFailedListener {
     private static final int RC_SIGN_USER_PROFILE = 101;
-    private TeluguBeatsApp app;
 	private GoogleApiClient mGoogleApiClient;
 	/* Is there a ConnectionResult resolution in progress? */
 	private boolean mIsResolving = false;
@@ -56,9 +56,8 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
 	private GenericListener<User> listener;
 	protected static final String ACTIVITIES_LOGIN = "http://schemas.google.com/AddActivity";
 
-	public GoogleLoginHelper(TeluguBeatsApp app) {
-		this.app = app;
-        mGoogleApiClient = new GoogleApiClient.Builder(this.app.getCurrentActivity())
+	public GoogleLoginHelper() {
+        mGoogleApiClient = new GoogleApiClient.Builder(TeluguBeatsApp.getCurrentActivity())
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Plus.API)
@@ -72,7 +71,7 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
 
 		mShouldResolve = true;
 
-		app.getCurrentActivity().setActivityResultListener(new GenericListener4<Integer, Integer, Intent, Void>() {
+		TeluguBeatsApp.getCurrentActivity().setActivityResultListener(new GenericListener4<Integer, Integer, Intent, Void>() {
             public void onData(Integer requestCode, Integer responseCode, Intent intent) {
                 onActivityResult(requestCode, responseCode, intent);
             }
@@ -97,11 +96,12 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
 
 	private void getUserProfileInformation(){
     	final User user = new User();
+        user.device_id = UserDeviceManager.getDeviceId();
         Person person = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
         Plus.PeopleApi.load(mGoogleApiClient, "me").setResultCallback(new ResultCallback<People.LoadPeopleResult>() {
             @Override
             public void onResult(final People.LoadPeopleResult loadPeopleResult) {
-                app.getUiUtils().addUiBlock("Fetching Profile.");
+                TeluguBeatsApp.getUiUtils().addUiBlock("Fetching Profile.");
                 if (loadPeopleResult.getStatus().getStatusCode() == CommonStatusCodes.SUCCESS) {
                     PersonBuffer personBuffer = loadPeopleResult.getPersonBuffer();
                     try {
@@ -143,7 +143,7 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
                 } else {
                     Log.e("GPLUS_HELPER", "Error requesting people data: " + loadPeopleResult.getStatus());
                 }
-                app.getUiUtils().removeUiBlock();
+                TeluguBeatsApp.getUiUtils().removeUiBlock();
             }
         });
 	}
@@ -154,7 +154,7 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
 
             @Override
             public void run() {
-                app.getUiUtils().addUiBlock(UiText.CONNECTING.getValue());
+                TeluguBeatsApp.getUiUtils().addUiBlock(UiText.CONNECTING.getValue());
                 AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
                     @Override
                     protected String doInBackground(Void... params) {
@@ -163,7 +163,7 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
 
                             token = GoogleAuthUtil
                                     .getToken(
-                                            app.getContext().getApplicationContext(),
+                                            TeluguBeatsApp.getContext().getApplicationContext(),
                                             user.email_id,
                                             "oauth2:"//+"server"
                                                     //+":client_id:" + Config.GOOGLE_PLUS_SERVER_CLIENT_ID
@@ -173,7 +173,7 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
                         } catch (UserRecoverableAuthException e) {
                             // Recover
 
-                            app.getCurrentActivity().startActivityForResult(e.getIntent(), GoogleLoginHelper.RC_SIGN_USER_PROFILE);
+                            TeluguBeatsApp.getCurrentActivity().startActivityForResult(e.getIntent(), GoogleLoginHelper.RC_SIGN_USER_PROFILE);
                             e.printStackTrace();
                             token = null;
                         } catch (GoogleAuthException authEx) {
@@ -190,7 +190,7 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
 
                     @Override
                     protected void onPostExecute(String token) {
-                        app.getUiUtils().removeUiBlock();
+                        TeluguBeatsApp.getUiUtils().removeUiBlock();
                         if (token != null) {
                             user.google_plus_token = token;
                             listener.onData(user);
@@ -252,7 +252,7 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
             if (connectionResult.hasResolution()) {
                 try {
                     mIsResolving = true;
-                    connectionResult.startResolutionForResult(app.getCurrentActivity(), RC_SIGN_IN);
+                    connectionResult.startResolutionForResult(TeluguBeatsApp.getCurrentActivity(), RC_SIGN_IN);
                 } catch (IntentSender.SendIntentException e) {
                     Log.e(Config.ERR_LOG_TAG, "Could not resolve ConnectionResult.", e);
                     mIsResolving = false;

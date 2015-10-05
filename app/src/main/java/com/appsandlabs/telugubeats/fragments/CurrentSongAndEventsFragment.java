@@ -18,12 +18,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.appsandlabs.telugubeats.R;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
+import com.appsandlabs.telugubeats.config.VisualizerConfig;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
 import com.appsandlabs.telugubeats.helpers.ABTemplating;
-import com.appsandlabs.telugubeats.services.MusicService;
-import com.appsandlabs.telugubeats.activities.R;
-import com.appsandlabs.telugubeats.config.VisualizerConfig;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -31,8 +30,6 @@ import com.squareup.picasso.Picasso;
  */
 public class CurrentSongAndEventsFragment extends Fragment {
 
-    MusicService musicService;
-    private boolean mBound;
     private Paint hLinesPaint;
     private Paint barPaint;
 

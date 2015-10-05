@@ -12,6 +12,7 @@ import android.util.Log;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.audiotools.FFT;
 import com.appsandlabs.telugubeats.audiotools.TByteArrayOutputStream;
+import com.appsandlabs.telugubeats.config.Config;
 import com.appsandlabs.telugubeats.helpers.ServerCalls;
 
 import org.apache.commons.io.IOUtils;
@@ -113,7 +114,7 @@ public class MusicService extends Service {
         public void run() {
                 try {
                     if(musicService.pause) return;
-                     URL url = new URL(ServerCalls.SERVER_ADDR + "/audio_stream/"+streamId);
+                     URL url = new URL(ServerCalls.SERVER_ADDR + "/stream/"+streamId+"/audio");
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     musicService.decode(con.getInputStream());
                 } catch (IOException | DecoderException e) {
@@ -217,7 +218,7 @@ public class MusicService extends Service {
         } catch (BitstreamException e) {
             throw new IOException("Bitstream error: " + e);
         } catch (DecoderException e) {
-            Log.w("com.appsandlabs.telugubeats", "Decoder error", e);
+            Log.w(Config.ERR_LOG_TAG, "Decoder error", e);
             throw new DecoderException("Decoder error", e);
         } finally {
             IOUtils.closeQuietly(inputStream);

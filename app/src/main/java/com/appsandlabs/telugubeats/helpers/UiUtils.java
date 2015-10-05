@@ -42,12 +42,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.appsandlabs.telugubeats.NotificationReciever;
+import com.appsandlabs.telugubeats.R;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
+import com.appsandlabs.telugubeats.activities.MainActivity;
 import com.appsandlabs.telugubeats.config.Config;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
-
-import com.appsandlabs.telugubeats.activities.MainActivity;
-import com.appsandlabs.telugubeats.activities.R;
 import com.appsandlabs.telugubeats.widgets.CustomLoadingDialog;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;

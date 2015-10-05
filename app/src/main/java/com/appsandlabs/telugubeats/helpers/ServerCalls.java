@@ -1,21 +1,34 @@
 package com.appsandlabs.telugubeats.helpers;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 
+import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.UserDeviceManager;
+import com.appsandlabs.telugubeats.config.Config;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
+import com.appsandlabs.telugubeats.models.Event;
 import com.appsandlabs.telugubeats.models.InitData;
 import com.appsandlabs.telugubeats.models.PollItem;
+import com.appsandlabs.telugubeats.models.User;
+import com.appsandlabs.telugubeats.response_models.PollsChanged;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import org.apache.http.Header;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 
 class Item<T> {
@@ -47,7 +60,7 @@ class RandomSelector <T>{
         while(sum < index ) {
              sum = sum + items.get(i++).reletiveProb;
         }
-        return items.get(i==0?0:i-1);
+        return items.get(   i==0?0:i-1);
     }
 }
 
@@ -59,8 +72,10 @@ public class ServerCalls {
 
     static AsyncHttpClient client = new AsyncHttpClient();
     static {
-        client.setMaxRetriesAndTimeout(3, 1000);
+        client.setMaxRetriesAndTimeout(1, 1000);
         client.setTimeout(4000);
+        if(UserDeviceManager.getAuthKey()!=null)
+            client.addHeader("auth_key", UserDeviceManager.getAuthKey());
     }
     static Gson gson = new Gson();
 
@@ -106,29 +121,30 @@ public class ServerCalls {
 	}
 
     public static void loadInitData(final GenericListener<InitData> listener) {
-        client.get(SERVER_ADDR + "stream/init_data/", new AsyncHttpResponseHandler() {
+        client.get(SERVER_ADDR + "/stream/"+streamId+"/init_data", new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 InitData initData = gson.fromJson(new String(responseBody), InitData.class);
+                initData.setCurrentPoll();
                 listener.onData(initData);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Log.d("com.appsandlabs.telugubeats", error.toString());
+                Log.d(Config.ERR_LOG_TAG , error.toString());
             }
         });
     }
 
-    public static void sendPoll(PollItem poll , final GenericListener<Boolean> listener) {
+    public static void sendPoll(PollItem pollItem , final GenericListener<Boolean> listener) {
         String authKey = UserDeviceManager.getAuthKey();
         if(authKey==null){
             //TODO: login dialog
             return;
         }
-
         client.addHeader("user_auth", authKey);
-        client.get(SERVER_ADDR + "/poll/"+poll.id, new AsyncHttpResponseHandler() {
+
+        client.get(SERVER_ADDR + "/poll/"+streamId+"/"+pollItem.poll+"/"+pollItem.id, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 listener.onData(true);
@@ -136,11 +152,77 @@ public class ServerCalls {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Log.d("com.appsandlabs.telugubeats", error.toString());
+                Log.d(Config.ERR_LOG_TAG, error.toString());
                 listener.onData(false);
             }
         });
     }
 
+    public static void registerUser(User user , final GenericListener<User> listener) {
+        RequestParams params = new RequestParams();
+        params.put("user_data", TeluguBeatsApp.gson.toJson(user));
+        client.post(SERVER_ADDR + "/user/login", params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                User user = gson.fromJson(new String(responseBody), User.class);
+                client.addHeader("auth_key", user.auth_key);
+                listener.onData(user);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+
+            }
+        });
+    }
+
+    public static void readEvents() {
+        new AsyncTask<Void, String, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                URL url = null;
+                try {
+                    url = new URL(ServerCalls.SERVER_ADDR + "/stream/" + ServerCalls.streamId + "/events");
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    Scanner inputStream = new Scanner(new InputStreamReader((con.getInputStream())));
+                    inputStream.useDelimiter("\r\n");
+                    //noinspection InfiniteLoopStatement
+                    while(true){
+                        StringBuilder str = new StringBuilder();
+                        String bytes;
+                        while(inputStream.hasNext()){
+                            bytes = inputStream.next();
+                            if(bytes==null) return null; //reinitialize
+                            if(bytes.equalsIgnoreCase("")){
+                                break; // stop word reached
+                            }
+                            str.append(bytes);
+                            str.append("\n");
+                        }
+                        publishProgress(str.toString());
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(String... values) {
+
+                Event event = TeluguBeatsApp.gson.fromJson(values[0] , Event.class);
+                if(event==null) return;
+                Object payload = null;
+                if(event.eventId.equalsIgnoreCase("polls_changed")){
+                    if(event.user.id.getId().equalsIgnoreCase(TeluguBeatsApp.currentUser.id.getId())) return; //user based poll , no changes
+                    payload = TeluguBeatsApp.gson.fromJson(event.payload, PollsChanged.class);
+                    TeluguBeatsApp.broadcastEvent(TeluguBeatsApp.AppEvent.POLLS_CHANGED, payload);
+                }
+            }
+        }.execute();
+    }
 }
 

@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.config.Config;
-import com.appsandlabs.telugubeats.activities.R;
+import com.appsandlabs.telugubeats.R;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -728,7 +728,7 @@ public class ABTemplating {
 								).margin(10, 0, 0, 0)
 						),
 						h(c("poll_percentage").ht(5).lgty(CENTER_VERTICAL),
-								c("poll_count").addLabel("").txtSize(14).lgty(CENTER_VERTICAL)
+								c("poll_count").addLabel("").txtSize(14).lgty(CENTER_VERTICAL).wd(30)
 						).ht(25)
 				).setBg(R.drawable.card).padding(20, 10, 20, 10);
 	}

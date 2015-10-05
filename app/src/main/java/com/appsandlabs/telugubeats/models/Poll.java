@@ -10,4 +10,6 @@ import java.util.List;
 public class Poll extends  BaseModel{
     @SerializedName("poll_items")
     public List<PollItem> pollItems;
+    @SerializedName("stream_id")
+    public String streamId;
 }

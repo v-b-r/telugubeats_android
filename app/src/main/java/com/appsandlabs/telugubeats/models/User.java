@@ -28,8 +28,10 @@ public class User {
         private int userType = 0;
         public String google_plus_uid;
         public String fb_uid;
-        public List<String> google_plus_friend_uids;
-        public List<String> fb_friend_uids;
+        public List<String> google_plus_friend_uids = new ArrayList<>();
+        public List<String> fb_friend_uids = new ArrayList<>();
+
+        public String auth_key;
 
     public void setName(String name) {
         this.name = name;

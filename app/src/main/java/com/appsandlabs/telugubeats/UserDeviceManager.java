@@ -11,7 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 import com.appsandlabs.telugubeats.config.Config;
-import com.appsandlabs.telugubeats.activities.R;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
