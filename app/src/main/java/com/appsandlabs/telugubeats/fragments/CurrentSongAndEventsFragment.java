@@ -1,6 +1,7 @@
 package com.appsandlabs.telugubeats.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -17,14 +18,16 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.appsandlabs.telugubeats.R;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.config.VisualizerConfig;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
+import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.helpers.UiUtils;
 import com.appsandlabs.telugubeats.interfaces.AppEventListener;
 
@@ -57,7 +60,7 @@ public class CurrentSongAndEventsFragment extends Fragment {
     public static class UiHandle{
 
         TextView songAndTitle;
-        LinearLayout scrollingDedications;
+        ListView scrollingDedications;
         TextView musicDirectors;
         TextView actors;
         TextView directors;
@@ -65,7 +68,7 @@ public class CurrentSongAndEventsFragment extends Fragment {
         TextView liveUsers;
         LinearLayout whatsAppDedicate;
         LinearLayout visualizer;
-        ImageView playingImage;
+
 
     }
 
@@ -74,7 +77,7 @@ public class CurrentSongAndEventsFragment extends Fragment {
     public UiHandle initUiHandle(ViewGroup layout){
 
         uiHandle.songAndTitle = (TextView)layout.findViewById(R.id.song_and_title);
-        uiHandle.scrollingDedications = (LinearLayout)layout.findViewById(R.id.scrolling_dedications);
+        uiHandle.scrollingDedications = (ListView)layout.findViewById(R.id.scrolling_dedications);
         uiHandle.musicDirectors = (TextView)layout.findViewById(R.id.music_directors);
         uiHandle.actors = (TextView)layout.findViewById(R.id.actors);
         uiHandle.directors = (TextView)layout.findViewById(R.id.directors);
@@ -82,7 +85,7 @@ public class CurrentSongAndEventsFragment extends Fragment {
         uiHandle.liveUsers = (TextView)layout.findViewById(R.id.live_users);
         uiHandle.whatsAppDedicate = (LinearLayout)layout.findViewById(R.id.whats_app_dedicate);
         uiHandle.visualizer = (LinearLayout)layout.findViewById(R.id.visualizer);
-        uiHandle.playingImage = (ImageView)layout.findViewById(R.id.playing_image);
+
 
         return uiHandle;
     }
@@ -222,6 +225,41 @@ public class CurrentSongAndEventsFragment extends Fragment {
 
 
         resetCurrentSong();
+
+        uiHandle.whatsAppDedicate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // popup to write a name
+                TeluguBeatsApp.getUiUtils().promptInput("Enter name of user", 0, "", "dedicate", new GenericListener<String>() {
+                    @Override
+                    public void onData(String a) {
+                        if (a.trim().isEmpty()) return;
+                        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                        sharingIntent.setType("text/plain");
+                        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, TeluguBeatsApp.currentUser.name + " has dedicated " + TeluguBeatsApp.currentSong.title + " song to you on TeluguBeats");
+                        String link = "https://play.google.com/store/apps/details?id=com.appsandlabs.telugubeats";
+                        sharingIntent.putExtra(Intent.EXTRA_TEXT, link);
+                        CurrentSongAndEventsFragment.this.startActivity(sharingIntent);
+
+                        ServerCalls.sendDedicateEvent(a, new GenericListener<Boolean>());
+                    }
+                });
+            }
+        });
+
+
+//        final ArrayList<String> eventsAdapter = new ArrayList<String>(TeluguBeatsApp.lastFewEvents);
+//        Collections.reverse(eventsAdapter);
+        uiHandle.scrollingDedications.setAdapter(new ArrayAdapter<String>(TeluguBeatsApp.getContext(),
+                android.R.layout.simple_list_item_1, android.R.id.text1, TeluguBeatsApp.getLastFewEvents()));
+
+
+        TeluguBeatsApp.addListener(TeluguBeatsApp.AppEvent.GENERIC_FEED, new AppEventListener() {
+            @Override
+            public void onEvent(TeluguBeatsApp.AppEvent type, Object data) {
+                ((ArrayAdapter)uiHandle.scrollingDedications.getAdapter()).notifyDataSetChanged();
+            }
+        });
         return layout;
     }
 

@@ -12,7 +12,6 @@ import com.appsandlabs.telugubeats.models.Event;
 import com.appsandlabs.telugubeats.models.InitData;
 import com.appsandlabs.telugubeats.models.PollItem;
 import com.appsandlabs.telugubeats.models.User;
-import com.appsandlabs.telugubeats.response_models.PollsChanged;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -23,7 +22,6 @@ import org.apache.http.Header;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -176,7 +174,7 @@ public class ServerCalls {
             }
         });
     }
-
+    static int count = 10;
     public static void readEvents() {
         new AsyncTask<Void, String, Void>() {
 
@@ -203,10 +201,9 @@ public class ServerCalls {
                         }
                         publishProgress(str.toString());
                     }
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    if(count-- > 0)
+                        readEvents();
                 }
                 return null;
             }
@@ -215,15 +212,34 @@ public class ServerCalls {
             protected void onProgressUpdate(String... values) {
 
                 Event event = TeluguBeatsApp.gson.fromJson(values[0] , Event.class);
-                if(event==null) return;
-                Object payload = null;
-                User eventUser = event.fromUser;
-                if(event.eventId.equalsIgnoreCase("polls_changed") && !TeluguBeatsApp.currentUser.isSame(eventUser)){
-                    payload = TeluguBeatsApp.gson.fromJson(event.payload, PollsChanged.class);
-                    TeluguBeatsApp.broadcastEvent(TeluguBeatsApp.AppEvent.POLLS_CHANGED, payload);
-                }
+                TeluguBeatsApp.onEvent(event);
+
+
             }
         }.execute();
+    }
+
+    public static void sendDedicateEvent(String userName, final GenericListener<Boolean> listener) {
+        String authKey = UserDeviceManager.getAuthKey();
+        if(authKey==null){
+            return;
+        }
+        RequestParams params = new RequestParams();
+        params.put("user_name", userName);
+
+        client.post(SERVER_ADDR + "/dedicate/", params ,  new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                listener.onData(true);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.d(Config.ERR_LOG_TAG, error.toString());
+                listener.onData(false);
+            }
+        });
+
     }
 }
 

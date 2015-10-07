@@ -8,7 +8,7 @@ import java.util.List;
  * Created by abhinav on 10/3/15.
  */
 public class User extends BaseModel{
-        private String name;
+        public String name;
         public String device_id;
         public String email_id;
         public String picture_url;

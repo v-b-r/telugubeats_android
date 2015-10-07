@@ -46,6 +46,9 @@ public class MainActivity extends AppBaseFragmentActivity {
                         TeluguBeatsApp.currentSong = data.currentSong;
                         TeluguBeatsApp.currentUser = data.user;
                         TeluguBeatsApp.blurredCurrentSongBg = null;
+                        for(String eventData : data.lastFewEvents){
+                            TeluguBeatsApp.onEvent(eventData, false);
+                        }
                         init(data);
                     }
                 });
@@ -67,11 +70,15 @@ public class MainActivity extends AppBaseFragmentActivity {
                 tabLayout.setupWithViewPager(mViewPager);
             }
         });
-
         if(TeluguBeatsApp.onSongChanged!=null && TeluguBeatsApp.currentSong!=null){
             TeluguBeatsApp.onSongChanged.sendMessage(TeluguBeatsApp.onSongChanged.obtainMessage());
         }
-      ServerCalls.readEvents();
+
+//        for(String eventString : data.lastFewEvents){
+//            TeluguBeatsApp.onEvent(eventString);
+//        }
+
+        ServerCalls.readEvents();
     }
 
 

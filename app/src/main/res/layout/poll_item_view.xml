@@ -18,10 +18,11 @@
             app:riv_oval="true"
 
             android:id="@+id/poll_image"
-            android:layout_width="80dp"
+            android:layout_width="50dp"
             android:orientation="vertical"
-            android:layout_height="80dp"
-            android:layout_marginLeft="5dp" />
+            android:layout_height="50dp"
+            android:layout_marginLeft="5dp"
+            android:layout_gravity="center_vertical" />
 
         <LinearLayout
             android:orientation="vertical"

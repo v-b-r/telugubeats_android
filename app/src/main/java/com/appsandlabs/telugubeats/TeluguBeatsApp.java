@@ -11,9 +11,12 @@ import com.appsandlabs.telugubeats.datalisteners.GenericListener;
 import com.appsandlabs.telugubeats.enums.NotifificationProcessingState;
 import com.appsandlabs.telugubeats.helpers.UiUtils;
 import com.appsandlabs.telugubeats.interfaces.AppEventListener;
+import com.appsandlabs.telugubeats.models.Event;
 import com.appsandlabs.telugubeats.models.Poll;
+import com.appsandlabs.telugubeats.models.PollItem;
 import com.appsandlabs.telugubeats.models.Song;
 import com.appsandlabs.telugubeats.models.User;
+import com.appsandlabs.telugubeats.response_models.PollsChanged;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -59,6 +62,7 @@ public class TeluguBeatsApp extends Application {
     public static Handler onSongPlayPaused = null;
     public static Handler showDeletenotification= null;
     public static Bitmap blurredCurrentSongBg = null;
+    private static List<String> lastFewEvents = new ArrayList<>();
 
     /**
      * Access to the global Analytics singleton. If this method returns null you forgot to either
@@ -78,6 +82,9 @@ public class TeluguBeatsApp extends Application {
         return tracker;
     }
 
+    public static List<String> getLastFewEvents() {
+        return lastFewEvents;
+    }
 
 
     @Override
@@ -158,10 +165,48 @@ public class TeluguBeatsApp extends Application {
     }
 
 
+    public static void onEvent(String eventString){
+        Event event = TeluguBeatsApp.gson.fromJson(eventString , Event.class);
+        onEvent(event, true);
+    }
+    public static void onEvent(String eventString, boolean doBroadcast){
+        Event event = TeluguBeatsApp.gson.fromJson(eventString , Event.class);
+        onEvent(event, doBroadcast);
+    }
+    public static void onEvent(Event event, boolean doBroadcast) {
+            if(event==null) return;
+            Object payload = null;
+            User eventUser = event.fromUser;
+            String feed;
+            switch (event.eventId){
+
+                case POLLS_CHANGED:
+                    PollsChanged pollsChanged = TeluguBeatsApp.gson.fromJson(event.payload, PollsChanged.class);
+                    PollItem changedPollItem = Poll.getChangedPoll(pollsChanged);
+                    feed = event.fromUser.name+ " voted up for "+ (changedPollItem!=null ? changedPollItem.song.title: " song ");
+                    TeluguBeatsApp.lastFewEvents.add(feed);
+                    if(doBroadcast) {
+                        TeluguBeatsApp.broadcastEvent(TeluguBeatsApp.AppEvent.GENERIC_FEED, feed);
+                    }
+
+
+                    if(!TeluguBeatsApp.currentUser.isSame(eventUser) && doBroadcast){
+                        TeluguBeatsApp.broadcastEvent(TeluguBeatsApp.AppEvent.POLLS_CHANGED, pollsChanged);
+                    }
+                    break;
+                case DEDICATE:
+                    feed = event.fromUser.name + " has dedicated " + TeluguBeatsApp.currentSong.title + " song to " + event.payload + " on TeluguBeats";
+                    TeluguBeatsApp.lastFewEvents.add(feed);
+                    if(doBroadcast) {
+                        TeluguBeatsApp.broadcastEvent(TeluguBeatsApp.AppEvent.GENERIC_FEED, feed);
+                    }
+                    break;
+            }
+    }
 
 
     public enum AppEvent {
-        NONE, POLLS_CHANGED, BLURRED_BG_AVAILABLE;
+        NONE, POLLS_CHANGED, BLURRED_BG_AVAILABLE, GENERIC_FEED;
 
         public Object getValue() {
             return value;

@@ -2,6 +2,7 @@ package com.appsandlabs.telugubeats.helpers;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -35,6 +36,8 @@ import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -962,6 +965,38 @@ public class UiUtils {
 			// Log exception
 			return null;
 		}
+	}
+
+	public void promptInput(String title, int charLimit, String prevStatus, String okText , final GenericListener<String> dataInputListener) {
+		final Dialog prompt = new Dialog(app.getContext(),R.style.CustomDialogTheme3);
+		ImageView closeButton;
+		TextView titleView;
+		final EditText messageContent;
+		TextView okButton;
+		LinearLayout baseLayout = (LinearLayout)app.getCurrentActivity().getLayoutInflater().inflate(R.layout.input_prompt, null);
+
+		closeButton = (ImageView) baseLayout.findViewById(R.id.close_button);
+		titleView = (TextView) baseLayout.findViewById(R.id.title);
+		titleView.setText(title);
+		messageContent = (EditText) baseLayout.findViewById(R.id.messageContent);
+		messageContent.setText(prevStatus);
+		okButton = (Button) baseLayout.findViewById(R.id.ok_button);
+		okButton.setText(okText);
+		closeButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				prompt.dismiss();
+			}
+		});
+		okButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dataInputListener.onData(messageContent.getText().toString());
+				prompt.dismiss();
+			}
+		});
+		prompt.setContentView(baseLayout);
+		prompt.show();
 	}
 	
 }

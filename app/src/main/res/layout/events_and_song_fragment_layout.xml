@@ -124,12 +124,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/scrolling_dedications"
-                android:layout_width="match_parent"
-                android:orientation="vertical"
-                android:layout_height="wrap_content"/>
-
-            <LinearLayout
 
                 android:layout_width="match_parent"
                 android:orientation="vertical"
@@ -174,12 +168,14 @@
                 android:id="@+id/visualizer"
                 android:layout_width="match_parent"
                 android:orientation="vertical"
-                android:layout_height="300dp"/>
-            <ImageView
-                android:id="@+id/playing_image"
-                android:layout_width="match_parent"
+                android:layout_height="150dp"/>
 
-                android:layout_height="match_parent"/>
+            <ListView
+                android:id="@+id/scrolling_dedications"
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_height="200dp" />
+
         </LinearLayout>
 
     </ScrollView>

@@ -2,6 +2,8 @@ package com.appsandlabs.telugubeats.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Created by abhinav on 10/1/15.
  */
@@ -12,7 +14,12 @@ public class InitData {
 
     @SerializedName("user_poll_item_id")
     public String userPollItemId;
+    @SerializedName("last_few_events")
+    public List<String> lastFewEvents;
+
+
     public User user;
+
 
 
     public PollItem setCurrentPoll(){

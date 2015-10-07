@@ -188,17 +188,25 @@ public class PollsListView extends ListView {
     }
 
     public void pollsChanged(PollsChanged data) {
+        boolean modified = false;
+        PollItem changedPoll = null;
         for(PollsChanged.PollChange change : data.pollChanges) {
             for (PollItem poll : polls) {
                 if (change.pollId.equals(poll.id.toString())) {
                     poll.pollCount += change.count;
+                    changedPoll = poll;
+                    if(change.count<1){
+                        modified = true;
+                    }
                     poll.pollCount = Math.max(0 , poll.pollCount);
                 }
             }
         }
+
         notifyDataSetChanged();
 
     }
+
 
     private void notifyDataSetChanged() {
         ((ArrayAdapter)getAdapter()).notifyDataSetChanged();
