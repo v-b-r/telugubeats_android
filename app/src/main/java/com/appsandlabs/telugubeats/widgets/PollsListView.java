@@ -5,19 +5,22 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.appsandlabs.telugubeats.R;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
-import com.appsandlabs.telugubeats.helpers.ABTemplating;
 import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.models.Poll;
 import com.appsandlabs.telugubeats.models.PollItem;
 import com.appsandlabs.telugubeats.response_models.PollsChanged;
-import com.appsandlabs.telugubeats.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -32,7 +35,7 @@ public class PollsListView extends ListView {
     private final ArrayList<PollItem> polls;
     private int total = 0;
     static final int DO_POLL = 1000;
-    static final int DEALYED_SERVER_CALL_TIME = 1000;
+    static final int DEALYED_SERVER_CALL_TIME = 5000;
     private PollItem currentVotedItem = null;
     private Handler mHandler = new Handler(){
         @Override
@@ -47,35 +50,83 @@ public class PollsListView extends ListView {
         }
     };
 
-    public PollsListView(final Context context) {
-        super(context);
+
+
+
+    public static class UiHandle{
+
+        ImageView pollImage;
+        TextView pollTitle;
+        TextView voted;
+        TextView pollSubtitle;
+        TextView pollSubtitle2;
+        TextView pollSubtitle3;
+        LinearLayout pollPercentage;
+        TextView pollCount;
+
+    }
+
+
+    public UiHandle initUiHandle(ViewGroup layout){
+        UiHandle uiHandle = new UiHandle();
+        uiHandle.pollImage = (ImageView)layout.findViewById(R.id.poll_image);
+        uiHandle.pollTitle = (TextView)layout.findViewById(R.id.poll_title);
+        uiHandle.voted = (TextView)layout.findViewById(R.id.voted);
+        uiHandle.pollSubtitle = (TextView)layout.findViewById(R.id.poll_subtitle);
+        uiHandle.pollSubtitle2 = (TextView)layout.findViewById(R.id.poll_subtitle2);
+        uiHandle.pollSubtitle3 = (TextView)layout.findViewById(R.id.poll_subtitle3);
+        uiHandle.pollPercentage = (LinearLayout)layout.findViewById(R.id.poll_percentage);
+        uiHandle.pollCount = (TextView)layout.findViewById(R.id.poll_count);
+        return uiHandle;
+    }
+
+
+
+    public PollsListView(final Context context, AttributeSet attrs) {
+        super(context, attrs);
         setAdapter(new ArrayAdapter<PollItem>(context, -1, polls = new ArrayList<PollItem>()) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 final PollItem poll = getItem(position);
-                ABTemplating.ABView pollView = (ABTemplating.ABView) convertView;
+                UiHandle uiHandle;
+                LinearLayout pollView = (LinearLayout) convertView;
                 if (pollView == null) {
-                    pollView = TeluguBeatsApp.abTemplating.getPollView();
-                    pollView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    pollView = (LinearLayout) View.inflate(getContext(), R.layout.poll_item_view, null);
+                    uiHandle = initUiHandle(pollView);
+                    pollView.setTag(uiHandle);
                 }
-                Picasso.with(context).load(poll.song.album.imageUrl).into(pollView.getCell("poll_image").getImage());
-                pollView.getCell("poll_title").getLabel().setText(poll.song.title + " - " + poll.song.album.name);
-                pollView.getCell("poll_subtitle").getLabel().setText(TextUtils.join(", ", poll.song.singers));
-                pollView.getCell("poll_subtitle2").getLabel().setText(TextUtils.join(", ", poll.song.album.directors));
-                pollView.getCell("poll_subtitle3").getLabel().setText(TextUtils.join(", ", poll.song.album.actors));
-                float pollPercentage = (poll.pollCount * 1.0f) / total;
-                pollView.getCell("poll_percentage").wgt(pollPercentage);
-                pollView.getCell("poll_count").getLabel().setText(poll.pollCount==0?" 0" : " "+poll.pollCount);
-                //pollView.getCell("dummy").wgt(1.0f - pollPercentage);
-                pollView.getCell("poll_percentage").setBackgroundColor(poll.color);
-                final ABTemplating.ABView finalPollView = pollView;
+                uiHandle = (UiHandle) pollView.getTag();
 
+                Picasso.with(context).load(poll.song.album.imageUrl).into(uiHandle.pollImage);
+                uiHandle.pollTitle.setText(poll.song.title + " - " + poll.song.album.name);
+                uiHandle.pollSubtitle.setText(TextUtils.join(", ", poll.song.singers));
+                uiHandle.pollSubtitle2.setText(TextUtils.join(", ", poll.song.album.directors));
+                if(poll.song.album.actors!=null && poll.song.album.actors.size()>0) {
+                    uiHandle.pollSubtitle3.setVisibility(View.VISIBLE);
+                    uiHandle.pollSubtitle3.setText(TextUtils.join(", ", poll.song.album.actors));
+                }
+                else{
+                    uiHandle.pollSubtitle3.setVisibility(View.GONE);
+                }
+
+
+                if (poll.pollCount > 0) {
+                    ((ViewGroup) uiHandle.pollPercentage.getParent()).setVisibility(View.VISIBLE);
+                    float pollPercentage = (poll.pollCount * 1.0f) / total;
+                    ((LinearLayout.LayoutParams) uiHandle.pollPercentage.getLayoutParams()).weight = pollPercentage;
+                    uiHandle.pollCount.setText(poll.pollCount == 0 ? "0 votes" : "" + poll.pollCount + " votes");
+                    //pollView.getCell("dummy").wgt(1.0f - pollPercentage);
+                    uiHandle.pollPercentage.setBackgroundColor(poll.color);
+                } else {
+                    ((ViewGroup) uiHandle.pollPercentage.getParent()).setVisibility(View.GONE);
+                }
+                final UiHandle finalUiHandle = uiHandle;
                 pollView.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(poll.isVoted) return;
+                        if (poll.isVoted) return;
                         doUserPoll(poll);
-                        finalPollView.getCell("voted").setBackgroundColor(getColorFromResource(R.color.malachite));
+                        finalUiHandle.voted.setBackgroundColor(getColorFromResource(R.color.malachite));
 
                         mHandler.removeMessages(DO_POLL);
                         Message msg = mHandler.obtainMessage(DO_POLL, poll);//create a new message
@@ -85,27 +136,29 @@ public class PollsListView extends ListView {
                 });
 
                 pollView.setFocusable(false);
-                if(poll.isVoted) {
-                    pollView.getCell("voted").setBackgroundColor(getColorFromResource(R.color.malachite));
-                }
-                else{
-                    pollView.getCell("voted").setBackgroundColor(Color.TRANSPARENT);
+                if (poll.isVoted) {
+                    uiHandle.voted.setBackgroundColor(getColorFromResource(R.color.malachite));
+                } else {
+                    uiHandle.voted.setBackgroundColor(Color.TRANSPARENT);
                 }
 
                 return pollView;
             }
 
         });
-        setDivider(null);
 //        setExpanded(true);
 //        setScrollContainer(false);
+
+
     }
 
     private synchronized void doUserPoll(PollItem poll) {
         if(currentVotedItem!=null) {
             currentVotedItem.isVoted = false;
-            currentVotedItem.pollCount--;
-            total--;
+            if(currentVotedItem.pollCount>0) {
+                currentVotedItem.pollCount--;
+                total--;
+            }
         }
         poll.isVoted = true;
         currentVotedItem  = poll;
@@ -139,6 +192,7 @@ public class PollsListView extends ListView {
             for (PollItem poll : polls) {
                 if (change.pollId.equals(poll.id.toString())) {
                     poll.pollCount += change.count;
+                    poll.pollCount = Math.max(0 , poll.pollCount);
                 }
             }
         }

@@ -9,6 +9,6 @@ public class Event {
     @SerializedName("event_id")
     public String eventId;
     public String payload;
-    public User user;
-
+    @SerializedName("from_user")
+    public User fromUser;
 }

@@ -88,12 +88,12 @@ public class FacebookLoginHelper {
 				if (response.getError() != null) {
 					Toast.makeText(
 							app.getContext(),
-							"There was a problem fetching user data",
+							"There was a problem fetching fromUser data",
 							Toast.LENGTH_LONG).show();
 					if (afterLoginListener != null)
 						afterLoginListener.onData(null);
 				} else {
-					//access to fb graph user details
+					//access to fb graph fromUser details
 					JSONObject fbUser = response.getJSONObject();
 					User user = new User();
 					user.facebook_token = AccessToken.getCurrentAccessToken().getToken();

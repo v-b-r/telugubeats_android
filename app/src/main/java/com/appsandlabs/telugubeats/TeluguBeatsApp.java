@@ -2,12 +2,13 @@ package com.appsandlabs.telugubeats;
 
 import android.app.Application;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 
 import com.appsandlabs.telugubeats.activities.AppBaseFragmentActivity;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
 import com.appsandlabs.telugubeats.enums.NotifificationProcessingState;
-import com.appsandlabs.telugubeats.helpers.ABTemplating;
 import com.appsandlabs.telugubeats.helpers.UiUtils;
 import com.appsandlabs.telugubeats.interfaces.AppEventListener;
 import com.appsandlabs.telugubeats.models.Poll;
@@ -44,7 +45,6 @@ public class TeluguBeatsApp extends Application {
     private static UiUtils uiUtils;
     private static Context applicationContext;
     private static AppBaseFragmentActivity currentActivity;
-    public static ABTemplating abTemplating;
     public static GenericListener<float[]> onFFTData;
     public static InputStream sfd_ser ;
     private static UserDeviceManager userDeviceManager;
@@ -55,6 +55,10 @@ public class TeluguBeatsApp extends Application {
     public static Song currentSong;
     public static Gson gson = new Gson();
     public static User currentUser;
+    public static Handler onSongChanged= null;
+    public static Handler onSongPlayPaused = null;
+    public static Handler showDeletenotification= null;
+    public static Bitmap blurredCurrentSongBg = null;
 
     /**
      * Access to the global Analytics singleton. If this method returns null you forgot to either
@@ -83,7 +87,6 @@ public class TeluguBeatsApp extends Application {
         applicationContext = getApplicationContext();
         uiUtils = new UiUtils(this);
         userDeviceManager = new UserDeviceManager(this);
-        abTemplating = new ABTemplating(this);
         nActivities = new AtomicInteger(0);
 
         analytics = GoogleAnalytics.getInstance(this);
@@ -123,10 +126,14 @@ public class TeluguBeatsApp extends Application {
 
 
     public static void onAllActivitiesDestroyed(){
+        if(TeluguBeatsApp.showDeletenotification!=null)
+            TeluguBeatsApp.showDeletenotification.sendMessage( TeluguBeatsApp.showDeletenotification.obtainMessage());
         uiUtils = null;
         applicationContext = null;
         currentActivity = null;
         eventListeners.clear();
+        blurredCurrentSongBg = null;
+        TeluguBeatsApp.showDeletenotification = null;
     }
 
 
@@ -154,7 +161,7 @@ public class TeluguBeatsApp extends Application {
 
 
     public enum AppEvent {
-        NONE, POLLS_CHANGED;
+        NONE, POLLS_CHANGED, BLURRED_BG_AVAILABLE;
 
         public Object getValue() {
             return value;

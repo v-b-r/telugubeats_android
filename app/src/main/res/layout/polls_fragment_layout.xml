@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
+    android:layout_width="match_parent"
+android:layout_height="match_parent">
+<TextView
+    android:id="@+id/live_polls_heading"
+    android:layout_width="match_parent"
+    android:text="Live polls"
+    android:padding="10dp"
+    android:textSize="30dp"
+    android:gravity="center"
+    android:textStyle="bold"
+    android:layout_height="wrap_content"
+    android:textColor="@color/less_black"
+    />
+<com.appsandlabs.telugubeats.widgets.PollsListView
+    android:id="@+id/live_polls_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/translucent_black" />
+</LinearLayout>

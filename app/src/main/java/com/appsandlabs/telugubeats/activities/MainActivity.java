@@ -1,12 +1,9 @@
 package com.appsandlabs.telugubeats.activities;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,7 +19,6 @@ import com.appsandlabs.telugubeats.fragments.CurrentSongAndEventsFragment;
 import com.appsandlabs.telugubeats.fragments.LiveChatFragment;
 import com.appsandlabs.telugubeats.fragments.LiveTalkFragment;
 import com.appsandlabs.telugubeats.fragments.PollsFragment;
-import com.appsandlabs.telugubeats.helpers.ABTemplating;
 import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.models.InitData;
 import com.appsandlabs.telugubeats.services.MusicService;
@@ -32,7 +28,6 @@ public class MainActivity extends AppBaseFragmentActivity {
     MusicService musicService;
     private boolean mBound;
     public ServiceConnection serviceConnection;
-    private ABTemplating.ABView layout;
     private AppFragments appFragments;
     private ViewPager mViewPager;
 
@@ -50,7 +45,7 @@ public class MainActivity extends AppBaseFragmentActivity {
                         TeluguBeatsApp.currentPoll = data.poll;
                         TeluguBeatsApp.currentSong = data.currentSong;
                         TeluguBeatsApp.currentUser = data.user;
-
+                        TeluguBeatsApp.blurredCurrentSongBg = null;
                         init(data);
                     }
                 });
@@ -73,6 +68,9 @@ public class MainActivity extends AppBaseFragmentActivity {
             }
         });
 
+        if(TeluguBeatsApp.onSongChanged!=null && TeluguBeatsApp.currentSong!=null){
+            TeluguBeatsApp.onSongChanged.sendMessage(TeluguBeatsApp.onSongChanged.obtainMessage());
+        }
       ServerCalls.readEvents();
     }
 
@@ -84,20 +82,20 @@ public class MainActivity extends AppBaseFragmentActivity {
         Intent svc=new Intent(this, MusicService.class);
         startService(svc);
         //connect to background service
-        bindService(svc, serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                MusicService.MusicServiceBinder binder = (MusicService.MusicServiceBinder) service;
-                musicService = binder.getService();
-                //start downloading and playing stream
-                mBound = true;
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mBound = false;
-            }
-        }, Context.BIND_AUTO_CREATE);
+//        bindService(svc, serviceConnection = new ServiceConnection() {
+//            @Override
+//            public void onServiceConnected(ComponentName name, IBinder service) {
+//                MusicService.MusicServiceBinder binder = (MusicService.MusicServiceBinder) service;
+//                musicService = binder.getService();
+//                //start downloading and playing stream
+//                mBound = true;
+//            }
+//
+//            @Override
+//            public void onServiceDisconnected(ComponentName name) {
+//                mBound = false;
+//            }
+//        }, Context.BIND_AUTO_CREATE);
 
 
     }

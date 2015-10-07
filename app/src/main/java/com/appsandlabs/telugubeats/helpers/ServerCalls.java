@@ -124,7 +124,8 @@ public class ServerCalls {
         client.get(SERVER_ADDR + "/stream/"+streamId+"/init_data", new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                InitData initData = gson.fromJson(new String(responseBody), InitData.class);
+                String temp = new String(responseBody);
+                InitData initData = gson.fromJson(temp, InitData.class);
                 initData.setCurrentPoll();
                 listener.onData(initData);
             }
@@ -161,7 +162,7 @@ public class ServerCalls {
     public static void registerUser(User user , final GenericListener<User> listener) {
         RequestParams params = new RequestParams();
         params.put("user_data", TeluguBeatsApp.gson.toJson(user));
-        client.post(SERVER_ADDR + "/user/login", params, new AsyncHttpResponseHandler() {
+        client.post(SERVER_ADDR + "/fromUser/login", params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 User user = gson.fromJson(new String(responseBody), User.class);
@@ -216,8 +217,8 @@ public class ServerCalls {
                 Event event = TeluguBeatsApp.gson.fromJson(values[0] , Event.class);
                 if(event==null) return;
                 Object payload = null;
-                if(event.eventId.equalsIgnoreCase("polls_changed")){
-                    if(event.user.id.getId().equalsIgnoreCase(TeluguBeatsApp.currentUser.id.getId())) return; //user based poll , no changes
+                User eventUser = event.fromUser;
+                if(event.eventId.equalsIgnoreCase("polls_changed") && !TeluguBeatsApp.currentUser.isSame(eventUser)){
                     payload = TeluguBeatsApp.gson.fromJson(event.payload, PollsChanged.class);
                     TeluguBeatsApp.broadcastEvent(TeluguBeatsApp.AppEvent.POLLS_CHANGED, payload);
                 }

@@ -259,7 +259,7 @@ public class GoogleLoginHelper implements ConnectionCallbacks, OnConnectionFaile
                     mGoogleApiClient.connect();
                 }
             } else {
-                // Could not resolve the connection result, show the user an
+                // Could not resolve the connection result, show the fromUser an
                 // error dialog.
 //                app.getStaticPopupDialogBoxes().yesOrNo(UiText.GPLUS_ERRROR.getValue(), null,  UiText.OK.getValue() , null);
             }

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ScrollView
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/translucent_black">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+            <TextView
+                android:id="@+id/song_and_title"
+                android:layout_width="match_parent"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:text="Title"
+
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+
+                    android:layout_width="0dp"
+                    android:text="Music Directors"
+                    android:textSize="10sp"
+                    android:textColor="@color/less_white"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3" />
+                <TextView
+                    android:id="@+id/music_directors"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.7"
+                    android:textSize="11sp"
+                    android:textColor="@color/less_white"
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:text="Actors"
+                    android:textSize="10sp"
+                    android:textColor="@color/less_white"
+
+                    android:layout_width="0dp"
+                    android:layout_weight="0.3"
+                    android:layout_height="match_parent"/>
+                <TextView
+                    android:id="@+id/actors"
+                    android:layout_width="0dp"
+                    android:textColor="@color/less_white"
+                    android:layout_weight="0.7"
+                    android:textSize="11sp"
+
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:text="Directors"
+                    android:textSize="10sp"
+                    android:textColor="@color/less_white"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.3"
+
+                    android:layout_height="match_parent"/>
+                <TextView
+                    android:id="@+id/directors"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.7"
+                    android:textColor="@color/less_white"
+                    android:textSize="11sp"
+
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+
+                    android:layout_width="0dp"
+                    android:layout_weight="0.3"
+                    android:text="Singers"
+                    android:textColor="@color/less_white"
+                    android:textSize="10sp"
+                    android:layout_height="match_parent"/>
+                <TextView
+                    android:id="@+id/singers"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.7"
+                    android:textSize="11sp"
+
+                    android:textColor="@color/less_white"
+
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/scrolling_dedications"
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_height="match_parent"/>
+            <LinearLayout
+                android:orientation="horizontal"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp">
+                <TextView
+                    android:id="@+id/live_users"
+                    android:layout_width="0dp"
+                    android:text="1152 listening"
+                    android:textSize="20sp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:layout_gravity="center_vertical" />
+                <LinearLayout
+                    android:id="@+id/whats_app_dedicate"
+                    android:layout_width="0dp"
+                    android:orientation="horizontal"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5" >
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/icon_whatsapp"
+                    />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Dedicate"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="10dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/visualizer"
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_height="300dp"/>
+            <ImageView
+                android:id="@+id/playing_image"
+                android:layout_width="match_parent"
+
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

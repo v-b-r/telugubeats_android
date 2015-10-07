@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+    <LinearLayout
+        android:orientation="horizontal"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.makeramen.RoundedImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            app:riv_border_color="#333333"
+            app:riv_mutate_background="true"
+            app:riv_oval="true"
+
+            android:id="@+id/poll_image"
+            android:layout_width="80dp"
+            android:orientation="vertical"
+            android:layout_height="80dp"
+            android:layout_marginLeft="5dp" />
+
+        <LinearLayout
+            android:orientation="vertical"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp">
+            <LinearLayout
+                android:orientation="horizontal"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp"
+                android:layout_marginTop="5dp">
+                <TextView
+                    android:id="@+id/poll_title"
+                    android:layout_width="wrap_content"
+                    android:textSize="15dp"
+                    android:text="title"
+
+                    android:layout_height="wrap_content"
+                   />
+                <TextView
+                    android:id="@+id/voted"
+                    android:layout_width="5dp"
+                    android:layout_height="5dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp">
+                <TextView
+                    android:id="@+id/poll_subtitle"
+                    android:textSize="10sp"
+                    android:text="subtitle"
+                    android:textColor="@color/less_white"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5" />
+                <TextView
+                    android:id="@+id/poll_subtitle2"
+                    android:layout_width="match_parent"
+                    android:textColor="@color/less_white"
+                    android:textSize="10sp"
+                    android:text="subtitle"
+
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5" />
+            </LinearLayout>
+
+            <TextView
+                android:textSize="10sp"
+                android:text="actors"
+                android:textColor="@color/less_white"
+                android:id="@+id/poll_subtitle3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp">
+                <LinearLayout
+                    android:id="@+id/poll_percentage"
+                    android:layout_width="0dp"
+                    android:orientation="vertical"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:background="@color/malachite" />
+
+                <TextView
+                    android:id="@+id/poll_count"
+                    android:layout_width="50dp"
+                    android:textSize="10sp"
+                    android:text="0 votes"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:gravity="center" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

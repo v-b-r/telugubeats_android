@@ -7,8 +7,7 @@ import java.util.List;
 /**
  * Created by abhinav on 10/3/15.
  */
-public class User {
-        public BaseModel.Id id;
+public class User extends BaseModel{
         private String name;
         public String device_id;
         public String email_id;
@@ -33,7 +32,11 @@ public class User {
 
         public String auth_key;
 
-    public void setName(String name) {
+        public void setName(String name) {
         this.name = name;
     }
+
+        public boolean isSame(User eventUser) {
+                return eventUser!=null&&eventUser.id.getId().equalsIgnoreCase(id.getId());
+        }
 }

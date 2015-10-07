@@ -14,4 +14,22 @@ public class Config {
     public static final int NOTIFICATION_ID = 12323;
     public static final String NOTIFICATION_KEY_MESSAGE_TYPE = "messageType";
     public static final String NOTIFICATION_KEY_TEXT_MESSAGE = "message";
-    public static final String GCM_NOTIFICATION_INTENT_ACTION = "com.appsandlabs.gcmnotification";}
+    public static final String GCM_NOTIFICATION_INTENT_ACTION = "com.appsandlabs.gcmnotification";
+
+
+    public static boolean currentVersionSupportBigNotification() {
+        int sdkVersion = android.os.Build.VERSION.SDK_INT;
+        if(sdkVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN){
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean currentVersionSupportLockScreenControls() {
+        int sdkVersion = android.os.Build.VERSION.SDK_INT;
+        if(sdkVersion >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH){
+            return true;
+        }
+        return false;
+    }
+}
