@@ -17,4 +17,7 @@ public class PollItem extends  BaseModel{
     @SerializedName("is_voted")
     public boolean isVoted;
     public Id poll;
+
+
+    public boolean _is_added;
 }

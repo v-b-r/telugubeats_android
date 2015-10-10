@@ -24,6 +24,7 @@ import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.audiotools.FFT;
 import com.appsandlabs.telugubeats.audiotools.TByteArrayOutputStream;
 import com.appsandlabs.telugubeats.config.Config;
+import com.appsandlabs.telugubeats.datalisteners.GenericListener;
 import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.helpers.UiUtils;
 
@@ -179,6 +180,7 @@ public class MusicService extends Service {
             } catch (IOException | DecoderException e) {
                 Log.d("telugubeats_log", "some error in thread");
                 e.printStackTrace();
+                //loop again from beginning getting headers and stuff
             }
         }
 
@@ -208,7 +210,7 @@ public class MusicService extends Service {
         AudioTrack track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
 
         track.play();
-        InputStream inputStream = new BufferedInputStream(stream, 2 * FFT_N_SAMPLES);
+        InputStream inputStream = new BufferedInputStream(stream, 16 * FFT_N_SAMPLES);
 
         fftArrayLeft = new float[leftFft.specSize()];
         fftArrayRight = new float[rightFft.specSize()];
@@ -220,7 +222,7 @@ public class MusicService extends Service {
             while (!done) {
                 Header frameHeader = bitstream.readFrame();
                 if (frameHeader == null) {
-                    done = true;
+                    throw(new IOException());
                 } else {
                     totalMs += frameHeader.ms_per_frame();
 
@@ -304,19 +306,20 @@ public class MusicService extends Service {
         }
 
 
-        Bitmap albumArt =  UiUtils.getBitmapFromURL(TeluguBeatsApp.currentSong.album.imageUrl);
-
-        if (albumArt != null) {
-            notification.contentView.setImageViewBitmap(R.id.imageViewAlbumArt, albumArt);
-            if (currentVersionSupportBigNotification) {
-                notification.bigContentView.setImageViewBitmap(R.id.imageViewAlbumArt, albumArt);
-            }
-        } else {
-            notification.contentView.setImageViewResource(R.id.imageViewAlbumArt, R.drawable.default_album_art);
-            if (currentVersionSupportBigNotification) {
-                notification.bigContentView.setImageViewResource(R.id.imageViewAlbumArt, R.drawable.default_album_art);
-            }
+        if(TeluguBeatsApp.songAlbumArt!=null){
+                notification.contentView.setImageViewBitmap(R.id.imageViewAlbumArt, TeluguBeatsApp.songAlbumArt);
+                if (currentVersionSupportBigNotification) {
+                    notification.bigContentView.setImageViewBitmap(R.id.imageViewAlbumArt, TeluguBeatsApp.songAlbumArt);
+                }
         }
+
+        UiUtils.getBitmapFromURL(TeluguBeatsApp.currentSong.album.imageUrl, new GenericListener<Bitmap>() {
+             @Override
+             public void onData(Bitmap albumArt) {
+                 TeluguBeatsApp.songAlbumArt = albumArt;
+                 newNotification();
+             }
+         });
 
 
         if (MusicService.done) {
@@ -355,6 +358,7 @@ public class MusicService extends Service {
 
         AppWidgetManager manager = AppWidgetManager.getInstance(getApplicationContext());
         manager.updateAppWidget(Config.NOTIFICATION_ID, notification.contentView);
+
 
         startForeground(Config.NOTIFICATION_ID, notification);
     }

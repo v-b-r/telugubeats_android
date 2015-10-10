@@ -9,5 +9,5 @@ public class VisualizerConfig {
     static public int barHeight = 150;
     static public int barSpacing  = 4;
     static public int barWidth = 16;
-    public static int hLines = 8;
+    public static int hLines = 16;
 }

@@ -8,7 +8,6 @@ import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.UserDeviceManager;
 import com.appsandlabs.telugubeats.config.Config;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
-import com.appsandlabs.telugubeats.models.Event;
 import com.appsandlabs.telugubeats.models.InitData;
 import com.appsandlabs.telugubeats.models.PollItem;
 import com.appsandlabs.telugubeats.models.User;
@@ -64,14 +63,17 @@ class RandomSelector <T>{
 
 public class ServerCalls {
     public static final String CDN_PATH = "https://storage.googleapis.com/quizapp-tollywood/";
-    public static final String SERVER_ADDR = "http://192.168.0.100:8888";
+    public static final String SERVER_ADDR = "http://192.168.0.105:8888";
     public static String streamId = "telugu";
+    private final TeluguBeatsApp app;
 
 
-    static AsyncHttpClient client = new AsyncHttpClient();
-    static {
-        client.setMaxRetriesAndTimeout(1, 1000);
+    AsyncHttpClient client = new AsyncHttpClient();
+    public ServerCalls(TeluguBeatsApp app){
+        this.app = app;
+        client.setMaxRetriesAndTimeout(1, 5000);
         client.setTimeout(4000);
+        client.setMaxConnections(100);
         if(UserDeviceManager.getAuthKey()!=null)
             client.addHeader("auth_key", UserDeviceManager.getAuthKey());
     }
@@ -118,8 +120,8 @@ public class ServerCalls {
 
 	}
 
-    public static void loadInitData(final GenericListener<InitData> listener) {
-        client.get(SERVER_ADDR + "/stream/"+streamId+"/init_data", new AsyncHttpResponseHandler() {
+    public void loadInitData(final GenericListener<InitData> listener) {
+        client.get(SERVER_ADDR + "/stream/" + streamId + "/init_data", new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 String temp = new String(responseBody);
@@ -130,12 +132,12 @@ public class ServerCalls {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Log.d(Config.ERR_LOG_TAG , error.toString());
+                Log.d(Config.ERR_LOG_TAG, error.toString());
             }
         });
     }
 
-    public static void sendPoll(PollItem pollItem , final GenericListener<Boolean> listener) {
+    public  void sendPoll(PollItem pollItem , final GenericListener<Boolean> listener) {
         String authKey = UserDeviceManager.getAuthKey();
         if(authKey==null){
             //TODO: login dialog
@@ -143,7 +145,7 @@ public class ServerCalls {
         }
         client.addHeader("user_auth", authKey);
 
-        client.get(SERVER_ADDR + "/poll/"+streamId+"/"+pollItem.poll+"/"+pollItem.id, new AsyncHttpResponseHandler() {
+        client.get(SERVER_ADDR + "/poll/" + streamId + "/" + pollItem.poll + "/" + pollItem.id, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 listener.onData(true);
@@ -157,10 +159,10 @@ public class ServerCalls {
         });
     }
 
-    public static void registerUser(User user , final GenericListener<User> listener) {
+    public  void registerUser(User user , final GenericListener<User> listener) {
         RequestParams params = new RequestParams();
         params.put("user_data", TeluguBeatsApp.gson.toJson(user));
-        client.post(SERVER_ADDR + "/fromUser/login", params, new AsyncHttpResponseHandler() {
+        client.post(SERVER_ADDR + "/user/login", params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 User user = gson.fromJson(new String(responseBody), User.class);
@@ -175,11 +177,22 @@ public class ServerCalls {
         });
     }
     static int count = 10;
-    public static void readEvents() {
-        new AsyncTask<Void, String, Void>() {
+    public void readEvents() {
+
+        new AsyncTask<Void , String , Void>(){
 
             @Override
             protected Void doInBackground(Void... params) {
+                readEvents();
+                return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(String... values) {
+                publishProgress(values[0]);
+            }
+
+            private void readEvents() {
                 URL url = null;
                 try {
                     url = new URL(ServerCalls.SERVER_ADDR + "/stream/" + ServerCalls.streamId + "/events");
@@ -192,7 +205,7 @@ public class ServerCalls {
                         String bytes;
                         while(inputStream.hasNext()){
                             bytes = inputStream.next();
-                            if(bytes==null) return null; //reinitialize
+                            if(bytes==null) return; //reinitialize
                             if(bytes.equalsIgnoreCase("")){
                                 break; // stop word reached
                             }
@@ -205,21 +218,16 @@ public class ServerCalls {
                     if(count-- > 0)
                         readEvents();
                 }
-                return null;
+                return;
             }
 
-            @Override
-            protected void onProgressUpdate(String... values) {
-
-                Event event = TeluguBeatsApp.gson.fromJson(values[0] , Event.class);
-                TeluguBeatsApp.onEvent(event);
-
-
+            private void publishProgress(String s) {
+                TeluguBeatsApp.onEvent(s);
             }
         }.execute();
     }
 
-    public static void sendDedicateEvent(String userName, final GenericListener<Boolean> listener) {
+    public void sendDedicateEvent(String userName, final GenericListener<Boolean> listener) {
         String authKey = UserDeviceManager.getAuthKey();
         if(authKey==null){
             return;
@@ -227,7 +235,7 @@ public class ServerCalls {
         RequestParams params = new RequestParams();
         params.put("user_name", userName);
 
-        client.post(SERVER_ADDR + "/dedicate/", params ,  new AsyncHttpResponseHandler() {
+        client.post(SERVER_ADDR + "/dedicate/" + streamId, params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 listener.onData(true);
@@ -240,6 +248,34 @@ public class ServerCalls {
             }
         });
 
+    }
+
+
+
+    public void closeAll() {
+        client.cancelAllRequests(true);
+    }
+
+    public void sendChat(String text,  final GenericListener<Boolean> listener) {
+        String authKey = UserDeviceManager.getAuthKey();
+        if(authKey==null){
+            return;
+        }
+        RequestParams params = new RequestParams();
+        params.put("chat_message", text);
+
+        client.post(SERVER_ADDR + "/chat/" + streamId, params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                listener.onData(true);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.d(Config.ERR_LOG_TAG, error.toString());
+                listener.onData(false);
+            }
+        });
     }
 }
 

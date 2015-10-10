@@ -7,6 +7,7 @@ public enum UiText {
     COPY_RIGHTS("Copyrights."),
     CONNECTING("Connecting"),
     CHECKING_FOR_FRIENDS("Fetching friends"),
+    UNABLE_TO_OPEN_INTENT("Unable to open intent"),
     NEW_TEXT_AVAILABLE("New notification from samosa");
 
     String value = null;

@@ -17,6 +17,10 @@ public class InitData {
     @SerializedName("last_few_events")
     public List<String> lastFewEvents;
 
+    @SerializedName("n_users")
+    public  int nUsers;
+
+
 
     public User user;
 

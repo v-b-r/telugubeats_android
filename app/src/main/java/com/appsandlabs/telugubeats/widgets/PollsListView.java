@@ -8,6 +8,8 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,7 +19,6 @@ import android.widget.TextView;
 import com.appsandlabs.telugubeats.R;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
-import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.models.Poll;
 import com.appsandlabs.telugubeats.models.PollItem;
 import com.appsandlabs.telugubeats.response_models.PollsChanged;
@@ -25,6 +26,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import static com.appsandlabs.telugubeats.TeluguBeatsApp.getServerCalls;
 import static com.appsandlabs.telugubeats.helpers.UiUtils.getColorFromResource;
 
 /**
@@ -41,7 +43,7 @@ public class PollsListView extends ListView {
         @Override
         public void handleMessage(Message msg) {
             PollItem pollItem = (PollItem) msg.obj;
-            ServerCalls.sendPoll(pollItem, new GenericListener<Boolean>() {
+            getServerCalls().sendPoll(pollItem, new GenericListener<Boolean>() {
                 @Override
                 public void onData(Boolean a) {
                     //TOOD:okay
@@ -101,11 +103,10 @@ public class PollsListView extends ListView {
                 uiHandle.pollTitle.setText(poll.song.title + " - " + poll.song.album.name);
                 uiHandle.pollSubtitle.setText(TextUtils.join(", ", poll.song.singers));
                 uiHandle.pollSubtitle2.setText(TextUtils.join(", ", poll.song.album.directors));
-                if(poll.song.album.actors!=null && poll.song.album.actors.size()>0) {
+                if (poll.song.album.actors != null && poll.song.album.actors.size() > 0) {
                     uiHandle.pollSubtitle3.setVisibility(View.VISIBLE);
                     uiHandle.pollSubtitle3.setText(TextUtils.join(", ", poll.song.album.actors));
-                }
-                else{
+                } else {
                     uiHandle.pollSubtitle3.setVisibility(View.GONE);
                 }
 
@@ -142,6 +143,11 @@ public class PollsListView extends ListView {
                     uiHandle.voted.setBackgroundColor(Color.TRANSPARENT);
                 }
 
+                if (!poll._is_added) {
+                    Animation animation = AnimationUtils.loadAnimation(TeluguBeatsApp.getCurrentActivity(), R.anim.zoom_in);
+                    pollView.startAnimation(animation);
+                    poll._is_added=true;
+                }
                 return pollView;
             }
 
@@ -206,6 +212,7 @@ public class PollsListView extends ListView {
         notifyDataSetChanged();
 
     }
+
 
 
     private void notifyDataSetChanged() {

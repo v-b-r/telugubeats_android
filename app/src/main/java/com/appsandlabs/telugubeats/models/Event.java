@@ -8,7 +8,9 @@ import com.google.gson.annotations.SerializedName;
 public class Event {
 
     public enum EventId{
+        SONG_CHANGED,
         POLLS_CHANGED,
+        CHAT_MESSAGE,
         DEDICATE;
     }
 
@@ -17,4 +19,8 @@ public class Event {
     public String payload;
     @SerializedName("from_user")
     public User fromUser;
+
+
+
+
 }

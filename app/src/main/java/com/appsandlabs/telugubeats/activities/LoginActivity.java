@@ -9,9 +9,10 @@ import com.appsandlabs.telugubeats.R;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
 import com.appsandlabs.telugubeats.config.Config;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
-import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.loginutils.GoogleLoginHelper;
 import com.appsandlabs.telugubeats.models.User;
+
+import static com.appsandlabs.telugubeats.TeluguBeatsApp.getServerCalls;
 
 /**
  * Created by abhinav on 10/4/15.
@@ -40,7 +41,7 @@ public class LoginActivity extends AppBaseFragmentActivity {
                 new GoogleLoginHelper().doLogin(new GenericListener<User>(){
                     @Override
                     public void onData(User user) {
-                        ServerCalls.registerUser(user , new GenericListener<User>() {
+                        getServerCalls().registerUser(user, new GenericListener<User>() {
                             @Override
                             public void onData(User user) {
                                 TeluguBeatsApp.getUserDeviceManager().setPreference(Config.PREF_ENCODED_KEY, user.auth_key);

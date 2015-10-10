@@ -25,7 +25,7 @@ public class PollsFragment extends Fragment implements AppEventListener {
     private LinearLayout layout;
 
     @Override
-    public void onEvent(TeluguBeatsApp.AppEvent type, Object data) {
+    public void onEvent(TeluguBeatsApp.NotifierEvent type, Object data) {
         switch (type){
             case POLLS_CHANGED:
                 uiHandle.livePollsList.pollsChanged((PollsChanged) data);
@@ -66,11 +66,11 @@ public class PollsFragment extends Fragment implements AppEventListener {
 
         blurredBgListener = new AppEventListener() {
             @Override
-            public void onEvent(TeluguBeatsApp.AppEvent type, Object data) {
+            public void onEvent(TeluguBeatsApp.NotifierEvent type, Object data) {
                 UiUtils.setBg(layout, new BitmapDrawable(TeluguBeatsApp.blurredCurrentSongBg));
             }
         };
-        TeluguBeatsApp.addListener(TeluguBeatsApp.AppEvent.BLURRED_BG_AVAILABLE, blurredBgListener);
+        TeluguBeatsApp.addListener(TeluguBeatsApp.NotifierEvent.BLURRED_BG_AVAILABLE, blurredBgListener);
 
         return layout;
     }
@@ -78,13 +78,13 @@ public class PollsFragment extends Fragment implements AppEventListener {
 
     @Override
     public void onResume() {
-        TeluguBeatsApp.addListener(TeluguBeatsApp.AppEvent.POLLS_CHANGED, this);
+        TeluguBeatsApp.addListener(TeluguBeatsApp.NotifierEvent.POLLS_CHANGED, this);
         super.onResume();
     }
 
     @Override
     public void onPause() {
-        TeluguBeatsApp.removeListener(TeluguBeatsApp.AppEvent.POLLS_CHANGED, this);
+        TeluguBeatsApp.removeListener(TeluguBeatsApp.NotifierEvent.POLLS_CHANGED, this);
         super.onPause();
     }
 }

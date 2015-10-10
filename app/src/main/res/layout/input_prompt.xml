@@ -5,10 +5,15 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:layout_margin="20dp"
-    android:background="@color/translucent_black"
+
     android:gravity="center"
     android:orientation="vertical" >
-
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/translucent_black_dark"
+        >
     <FrameLayout
         android:id="@+id/wrap_3"
         android:layout_width="match_parent"
@@ -45,22 +50,25 @@
     	    android:contentDescription="message"
     	    android:textColor="@color/less_white"
     	    android:gravity="center"
-    	    android:hint="Your Message"
+    	    android:hint="type user name"
     	    android:linksClickable="true"
     		android:inputType="textMultiLine"
+        android:textColorHint="@color/less_white"
     	    android:maxLength="500"
     	    android:maxLines="5"
     	    android:minHeight="100dp" />
 
 	<Button
 	    android:id="@+id/ok_button"
-	    style="?android:attr/buttonStyleSmall"
+	    style="@style/button_text"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_gravity="right"
-	    android:layout_marginBottom="5dp"
+        android:layout_marginBottom="5dp"
 	    android:layout_marginRight="10dp"
-	    android:background="@drawable/card"
-	    android:text="OK" />
-	
+	    android:background="@drawable/red_button"
+	    android:text="OK"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+        </LinearLayout>
 </LinearLayout>

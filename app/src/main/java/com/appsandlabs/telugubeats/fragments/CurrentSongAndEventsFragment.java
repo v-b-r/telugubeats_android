@@ -19,15 +19,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appsandlabs.telugubeats.R;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
+import com.appsandlabs.telugubeats.UiText;
 import com.appsandlabs.telugubeats.config.VisualizerConfig;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
-import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.helpers.UiUtils;
 import com.appsandlabs.telugubeats.interfaces.AppEventListener;
 
@@ -36,6 +40,8 @@ import java.util.concurrent.Callable;
 import bolts.Continuation;
 import bolts.Task;
 
+import static com.appsandlabs.telugubeats.TeluguBeatsApp.getContext;
+import static com.appsandlabs.telugubeats.TeluguBeatsApp.getServerCalls;
 import static com.appsandlabs.telugubeats.helpers.UiUtils.getColorFromResource;
 
 /**
@@ -54,8 +60,10 @@ public class CurrentSongAndEventsFragment extends Fragment {
     private View visualizerView;
     public ServiceConnection serviceConnection;
     private Bitmap mBitmap;
-    private LinearLayout layout;
+    private ViewGroup layout;
     private AppEventListener blurredBgListener;
+    private AppEventListener feedChangeListener;
+    private AppEventListener songChangeListener;
 
     public static class UiHandle{
 
@@ -68,7 +76,9 @@ public class CurrentSongAndEventsFragment extends Fragment {
         TextView liveUsers;
         LinearLayout whatsAppDedicate;
         LinearLayout visualizer;
-
+        EditText saySomethingText;
+        Button sayButton;
+        ScrollView scrollView;
 
     }
 
@@ -85,8 +95,9 @@ public class CurrentSongAndEventsFragment extends Fragment {
         uiHandle.liveUsers = (TextView)layout.findViewById(R.id.live_users);
         uiHandle.whatsAppDedicate = (LinearLayout)layout.findViewById(R.id.whats_app_dedicate);
         uiHandle.visualizer = (LinearLayout)layout.findViewById(R.id.visualizer);
-
-
+        uiHandle.saySomethingText = (EditText)layout.findViewById(R.id.say_something_text);
+        uiHandle.sayButton  = (Button)layout.findViewById(R.id.say_button);
+        uiHandle.scrollView = (ScrollView)layout.findViewById(R.id.scrolling_view);
         return uiHandle;
     }
 
@@ -104,7 +115,7 @@ public class CurrentSongAndEventsFragment extends Fragment {
         barPaint.setStrokeWidth(1);
         barPaint.setShader(new LinearGradient(0, 0, 0, VisualizerConfig.barHeight, getColorFromResource(R.color.malachite), Color.argb(255, 200, 200, 200), Shader.TileMode.MIRROR));
         barPaint.setStyle(Paint.Style.FILL);
-        layout = (LinearLayout) inflater.inflate(R.layout.events_and_song_fragment_layout, null);
+        layout = (ViewGroup) inflater.inflate(R.layout.events_and_song_fragment_layout, null);
 
         uiHandle = initUiHandle(layout);
 
@@ -224,7 +235,6 @@ public class CurrentSongAndEventsFragment extends Fragment {
         // get current
 
 
-        resetCurrentSong();
 
         uiHandle.whatsAppDedicate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,14 +244,23 @@ public class CurrentSongAndEventsFragment extends Fragment {
                     @Override
                     public void onData(String a) {
                         if (a.trim().isEmpty()) return;
-                        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                        sharingIntent.setType("text/plain");
-                        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, TeluguBeatsApp.currentUser.name + " has dedicated " + TeluguBeatsApp.currentSong.title + " song to you on TeluguBeats");
-                        String link = "https://play.google.com/store/apps/details?id=com.appsandlabs.telugubeats";
-                        sharingIntent.putExtra(Intent.EXTRA_TEXT, link);
-                        CurrentSongAndEventsFragment.this.startActivity(sharingIntent);
 
-                        ServerCalls.sendDedicateEvent(a, new GenericListener<Boolean>());
+
+                        getServerCalls().sendDedicateEvent(a, new GenericListener<Boolean>() {
+                            @Override
+                            public void onData(Boolean s) {
+                                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                                sharingIntent.setType("text/plain");
+                                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, TeluguBeatsApp.currentUser.name + " has dedicated " + TeluguBeatsApp.currentSong.title + " song to you on TeluguBeats");
+                                String link = "https://play.google.com/store/apps/details?id=com.appsandlabs.telugubeats";
+                                sharingIntent.putExtra(Intent.EXTRA_TEXT, link);
+                                sharingIntent.setPackage("com.whatsapp");
+
+                                if(sharingIntent.resolveActivity(getActivity().getPackageManager()) != null)
+                                    startActivityForResult(sharingIntent, 0);
+                                Toast.makeText(getContext() , UiText.UNABLE_TO_OPEN_INTENT.getValue() ,  Toast.LENGTH_SHORT );
+                            }
+                        });
                     }
                 });
             }
@@ -250,16 +269,34 @@ public class CurrentSongAndEventsFragment extends Fragment {
 
 //        final ArrayList<String> eventsAdapter = new ArrayList<String>(TeluguBeatsApp.lastFewEvents);
 //        Collections.reverse(eventsAdapter);
-        uiHandle.scrollingDedications.setAdapter(new ArrayAdapter<String>(TeluguBeatsApp.getContext(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, TeluguBeatsApp.getLastFewEvents()));
+          uiHandle.scrollingDedications.setAdapter(new ArrayAdapter<String>(TeluguBeatsApp.getContext(),
+                  R.layout.simple_list_item_1, R.id.text_view, TeluguBeatsApp.getLastFewFeedEvents()));
 
 
-        TeluguBeatsApp.addListener(TeluguBeatsApp.AppEvent.GENERIC_FEED, new AppEventListener() {
+
+        uiHandle.saySomethingText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
             @Override
-            public void onEvent(TeluguBeatsApp.AppEvent type, Object data) {
-                ((ArrayAdapter)uiHandle.scrollingDedications.getAdapter()).notifyDataSetChanged();
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    UiUtils.scrollToBottom(uiHandle.scrollingDedications);
+                    UiUtils.scrollToBottom(uiHandle.scrollView);
+                }
             }
         });
+
+        uiHandle.sayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = uiHandle.saySomethingText.getText().toString();
+                uiHandle.saySomethingText.setText("");
+                getServerCalls().sendChat(text, new GenericListener<Boolean>());
+                uiHandle.saySomethingText.requestFocus();
+            }
+        });
+
+
+        UiUtils.scrollToBottom(uiHandle.scrollingDedications);
         return layout;
     }
 
@@ -288,7 +325,7 @@ public class CurrentSongAndEventsFragment extends Fragment {
 
         if (TeluguBeatsApp.currentSong.album.musicDirectors!=null && TeluguBeatsApp.currentSong.album.musicDirectors.size()>0) {
             ((ViewGroup)uiHandle.musicDirectors.getParent()).setVisibility(View.VISIBLE);
-            uiHandle.musicDirectors.setText(TextUtils.join(", ", TeluguBeatsApp.currentSong.singers));
+            uiHandle.musicDirectors.setText(TextUtils.join(", ", TeluguBeatsApp.currentSong.album.musicDirectors));
         }
         else{
             ((ViewGroup)uiHandle.musicDirectors.getParent()).setVisibility(View.GONE);
@@ -310,20 +347,19 @@ public class CurrentSongAndEventsFragment extends Fragment {
                     @Override
                     public Object then(Task<Bitmap> task) throws Exception {
                         TeluguBeatsApp.blurredCurrentSongBg = task.getResult();
-                        TeluguBeatsApp.broadcastEvent(TeluguBeatsApp.AppEvent.BLURRED_BG_AVAILABLE, null);
+                        TeluguBeatsApp.broadcastEvent(TeluguBeatsApp.NotifierEvent.BLURRED_BG_AVAILABLE, null);
                         return null;
                     }
                 }, Task.UI_THREAD_EXECUTOR);
 
                 blurredBgListener = new AppEventListener() {
                     @Override
-                    public void onEvent(TeluguBeatsApp.AppEvent type, Object data) {
+                    public void onEvent(TeluguBeatsApp.NotifierEvent type, Object data) {
                         UiUtils.setBg(layout, new BitmapDrawable(TeluguBeatsApp.blurredCurrentSongBg));
                     }
                 };
 
-                TeluguBeatsApp.addListener(TeluguBeatsApp.AppEvent.BLURRED_BG_AVAILABLE, blurredBgListener);
-
+                TeluguBeatsApp.addListener(TeluguBeatsApp.NotifierEvent.BLURRED_BG_AVAILABLE, blurredBgListener);
             }
         }
 
@@ -345,6 +381,24 @@ public class CurrentSongAndEventsFragment extends Fragment {
                 return;
             }
         };
+
+        resetCurrentSong();
+
+        TeluguBeatsApp.addListener(TeluguBeatsApp.NotifierEvent.GENERIC_FEED, feedChangeListener = new AppEventListener() {
+            @Override
+            public void onEvent(TeluguBeatsApp.NotifierEvent type, Object data) {
+                ((ArrayAdapter) uiHandle.scrollingDedications.getAdapter()).notifyDataSetChanged();
+                UiUtils.scrollToBottom(uiHandle.scrollingDedications);
+                UiUtils.scrollToBottom(uiHandle.scrollView);
+            }
+        });
+
+        TeluguBeatsApp.addListener(TeluguBeatsApp.NotifierEvent.SONG_CHANGED, songChangeListener= new AppEventListener() {
+            @Override
+            public void onEvent(TeluguBeatsApp.NotifierEvent type, Object data) {
+                resetCurrentSong();
+            }
+        });
         //add current song change listener
         super.onResume();
     }
@@ -352,7 +406,9 @@ public class CurrentSongAndEventsFragment extends Fragment {
     @Override
     public void onPause() {
         TeluguBeatsApp.onFFTData = new GenericListener<>();
-        TeluguBeatsApp.removeListener(TeluguBeatsApp.AppEvent.BLURRED_BG_AVAILABLE, blurredBgListener);
+        TeluguBeatsApp.removeListener(TeluguBeatsApp.NotifierEvent.BLURRED_BG_AVAILABLE, blurredBgListener);
+        TeluguBeatsApp.removeListener(TeluguBeatsApp.NotifierEvent.GENERIC_FEED, feedChangeListener);
+        TeluguBeatsApp.removeListener(TeluguBeatsApp.NotifierEvent.SONG_CHANGED, songChangeListener);
         //TODO : remove event listener
 
         super.onPause();

@@ -7,5 +7,5 @@ import com.appsandlabs.telugubeats.TeluguBeatsApp;
  */
 public interface AppEventListener {
 
-    void onEvent(TeluguBeatsApp.AppEvent type, Object data);
+    void onEvent(TeluguBeatsApp.NotifierEvent type, Object data);
 }

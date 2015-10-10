@@ -19,6 +19,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         >
+
         <service android:name="com.appsandlabs.telugubeats.services.MusicService"
             android:exported="true"
             android:enabled="true"/>

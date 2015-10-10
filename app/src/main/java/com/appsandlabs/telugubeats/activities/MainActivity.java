@@ -14,14 +14,15 @@ import android.view.MenuItem;
 
 import com.appsandlabs.telugubeats.R;
 import com.appsandlabs.telugubeats.TeluguBeatsApp;
+import com.appsandlabs.telugubeats.config.VisualizerConfig;
 import com.appsandlabs.telugubeats.datalisteners.GenericListener;
 import com.appsandlabs.telugubeats.fragments.CurrentSongAndEventsFragment;
-import com.appsandlabs.telugubeats.fragments.LiveChatFragment;
 import com.appsandlabs.telugubeats.fragments.LiveTalkFragment;
 import com.appsandlabs.telugubeats.fragments.PollsFragment;
-import com.appsandlabs.telugubeats.helpers.ServerCalls;
 import com.appsandlabs.telugubeats.models.InitData;
 import com.appsandlabs.telugubeats.services.MusicService;
+
+import static com.appsandlabs.telugubeats.TeluguBeatsApp.getServerCalls;
 
 public class MainActivity extends AppBaseFragmentActivity {
 
@@ -39,15 +40,17 @@ public class MainActivity extends AppBaseFragmentActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                ServerCalls.loadInitData(new GenericListener<InitData>() {
+                getServerCalls().loadInitData(new GenericListener<InitData>() {
                     @Override
                     public void onData(InitData data) {
                         TeluguBeatsApp.currentPoll = data.poll;
                         TeluguBeatsApp.currentSong = data.currentSong;
                         TeluguBeatsApp.currentUser = data.user;
                         TeluguBeatsApp.blurredCurrentSongBg = null;
-                        for(String eventData : data.lastFewEvents){
-                            TeluguBeatsApp.onEvent(eventData, false);
+                        if (data.lastFewEvents != null) {
+                            for (String eventData : data.lastFewEvents) {
+                                TeluguBeatsApp.onEvent(eventData, false);
+                            }
                         }
                         init(data);
                     }
@@ -60,6 +63,9 @@ public class MainActivity extends AppBaseFragmentActivity {
 
     private void init(InitData data) {
         setContentView(R.layout.activity_main);
+
+        VisualizerConfig.barHeight = (int) TeluguBeatsApp.getUiUtils().dp2px(100);
+
         appFragments = new AppFragments(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(appFragments);
@@ -78,7 +84,7 @@ public class MainActivity extends AppBaseFragmentActivity {
 //            TeluguBeatsApp.onEvent(eventString);
 //        }
 
-        ServerCalls.readEvents();
+        getServerCalls().readEvents();
     }
 
 
@@ -166,8 +172,6 @@ public class MainActivity extends AppBaseFragmentActivity {
                 return new PollsFragment();
 
             else if (position==2)
-                return new LiveChatFragment();
-            else if (position==3)
                 return new LiveTalkFragment();
             return null;
 
@@ -176,7 +180,7 @@ public class MainActivity extends AppBaseFragmentActivity {
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 4;
+            return 3;
         }
 
 //        public int getPageIcon(int position) {
@@ -200,9 +204,7 @@ public class MainActivity extends AppBaseFragmentActivity {
                 case 1:
                     return "Polls";
                 case 2:
-                    return "Chat";
-                case 3:
-                    return "Listen";
+                    return "Talk on Radio";
 
             }
             return null;
